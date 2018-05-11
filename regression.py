@@ -4,64 +4,66 @@ from collections import defaultdict
 import numpy
 import pandas as pd
 
+### Global variables
+col_names = []
 
-def dotProduct(list1, list2):
-	if len(list1) != len(list2):
-		raise Exception('dotProduct error: list length dont match')
+
+### Helper functions
+def dotProduct(vec1, vec2):
 	dot = 0
-	for i in range(len(list1)):
-		dot += list1[i] * list2[i]
+	for k, v in vec1.iteritems():
+		if k in vec2.keys():
+			dot += v * vec2[k]
 	return dot
+
+def increment(vec1, scale, vec2):
+	for k, v in vec1.iteritems():
+		vec1[k] +=  scale * vec2[k]
+
 
 def error(example, weights, true):
 	return math.pow((true - dotProduct(example, weights)), 2)
 
-def d_error(example, weights, true):
+def d_error(features, weights, trueVal):
 	#print example
-	scale = 2*(dotProduct(example, weights) - true)
-	return [x * scale for x in example]
+	gradient = {}
+	scale = 2*(dotProduct(features, weights) - trueVal)
+	increment(gradient, scale, features)
+	return gradient
 
 def learnRegression(examples, numIters, stepSize):
 	#print examples[0]
-	weights = {}
+	weights = defaultdict()
 	#print "weights", len(weights)
 
 	for i in range(numIters):
 		for x, y in examples:
-			print "x", len(x)
+			#print "x", len(x)
+			features = featurize(x)
 
-			gradient = d_error(x, weights, y)
-			weights -= [stepSize * element for element in gradient]
+			gradient = d_error(features, weights, y)
+			increment(weights, stepSize, gradient)
+			print weights
 
 	def predictor(x):
-		return dotProduct(x, tuple(weights))
+		return dotProduct(featurize(x), weights)
 
+	print weights
 	return predictor
 
-def featurize(data_arr):
-	new_array = [[] for _ in range(len(data_arr))]
+def featurize(x):
+	features = defaultdict()
 
-	numData = defaultdict()
-
-	for col in range(1, len(data_arr[0])):
-		
-		if type(data_arr[1][col]) == str:
-			# if we need to featurize this variable
-			for row in range(len(data_arr)):
-				
-				if msZone in numData:
-					numData[msZone] += 1
-				else:
-					numData[msZone] = 1
-			print numData
-			print len(numData)
-
+	for i in range(len(x)):
+		if type(x[i]) == str:
+			#add an indicator feature
+			features[col_names[i] + x[i]] = 1
 		else:
-			# we just add the column of numbers
-			for row in range(len(data_arr)):
-				if data_arr[row][col]
-				new_array[row].append(data_arr[row][col])
-
+			#add the number itself as our feature value
+			features[col_names[i]] = x[i]
+	
+	#print features
+	return features
 
 def evaluatePredictor(predictor, examples):
     '''
@@ -75,14 +77,14 @@ def evaluatePredictor(predictor, examples):
     return error / len(examples)
 
 ## Processing training data
-file_train = 'train.csv'
+file_train = 'train_updated.csv'
 data_train = pd.read_csv(file_train)
+col_names = data_train.columns.tolist()[1:]
+
 #print(data_train.head())
 train_array = data_train.as_matrix(columns=None)
 
-train_array = featurize(train_array)
-
-train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][80]/1000.0) for i in range(len(train_array))]
+train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
 #print train_examples
 '''for i in range(len(train_array)):
 	cur_x = ()
