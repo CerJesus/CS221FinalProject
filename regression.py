@@ -11,18 +11,19 @@ col_names = []
 ### Helper functions
 def dotProduct(vec1, vec2):
 	dot = 0
+	#print vec2
 	for k, v in vec1.iteritems():
 		if k in vec2.keys():
-			dot += v * vec2[k]
+			dot += vec1[k] * vec2[k]
+	print dot 
 	return dot
 
-def increment(vec1, scale, vec2):
+def increment(vec1, scale, vec2): 
 	for f, v in vec2.items():
 		if f in vec1.keys():
 			vec1[f] += scale * vec2[f]
 		else:
 			vec1[f] = scale * vec2[f]
-
 
 def error(example, weights, true):
 	return math.pow((true - dotProduct(example, weights)), 2)
@@ -31,7 +32,11 @@ def d_error(features, weights, trueVal):
 	#print example
 	gradient = {}
 	scale = 2*(dotProduct(features, weights) - trueVal)
+	print "scale", scale
+	#print features
+	#print weights
 	increment(gradient, scale, features)
+	#print gradient
 	return gradient
 
 def learnRegression(examples, numIters, stepSize):
@@ -45,7 +50,8 @@ def learnRegression(examples, numIters, stepSize):
 			features = featurize(x)
 
 			gradient = d_error(features, weights, y)
-			increment(weights, stepSize, gradient)
+			increment(weights, - stepSize, gradient)
+			#print weights
 
 	def predictor(x):
 		return dotProduct(featurize(x), weights)
@@ -57,9 +63,12 @@ def featurize(x):
 	features = defaultdict(int)
 
 	for i in range(len(x)):
+		#print type(x[i]), x[i]
 		if type(x[i]) == str:
 			#add an indicator feature
 			features[col_names[i] + x[i]] = 1
+		elif math.isnan(x[i]):
+			features[col_names[i] + 'NA'] = 1
 		else:
 			#add the number itself as our feature value
 			features[col_names[i]] = x[i]
@@ -87,7 +96,7 @@ col_names = data_train.columns.tolist()[1:]
 train_array = data_train.as_matrix(columns=None)
 
 train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
-#print train_examples
+print train_examples[1][1]
 '''for i in range(len(train_array)):
 	cur_x = ()
 	for j in range(len(train_array[i]) - 1):
@@ -102,7 +111,7 @@ test_array = data_test.as_matrix(columns=None)
 
 #test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
 
-logisticPredictor = learnRegression(train_examples, 1, 0.1)
+logisticPredictor = learnRegression(train_examples, 1, 0.001)
 print "the training error for the regression is:", evaluatePredictor(logisticPredictor, train_examples)
 
 
