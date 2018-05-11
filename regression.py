@@ -23,12 +23,13 @@ def d_error(example, weights, true):
 
 def learnRegression(examples, numIters, stepSize):
 	#print examples[0]
-	weights = [0 for i in range(len(examples[0][0]))]
+	weights = {}
 	#print "weights", len(weights)
 
 	for i in range(numIters):
 		for x, y in examples:
 			print "x", len(x)
+
 			gradient = d_error(x, weights, y)
 			weights -= [stepSize * element for element in gradient]
 
@@ -36,6 +37,31 @@ def learnRegression(examples, numIters, stepSize):
 		return dotProduct(x, tuple(weights))
 
 	return predictor
+
+def featurize(data_arr):
+	new_array = [[] for _ in range(len(data_arr))]
+
+	numData = defaultdict()
+
+	for col in range(1, len(data_arr[0])):
+		
+		if type(data_arr[1][col]) == str:
+			# if we need to featurize this variable
+			for row in range(len(data_arr)):
+				
+				if msZone in numData:
+					numData[msZone] += 1
+				else:
+					numData[msZone] = 1
+			print numData
+			print len(numData)
+
+		else:
+			# we just add the column of numbers
+			for row in range(len(data_arr)):
+				if data_arr[row][col]
+				new_array[row].append(data_arr[row][col])
+
 
 def evaluatePredictor(predictor, examples):
     '''
@@ -53,6 +79,8 @@ file_train = 'train.csv'
 data_train = pd.read_csv(file_train)
 #print(data_train.head())
 train_array = data_train.as_matrix(columns=None)
+
+train_array = featurize(train_array)
 
 train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][80]/1000.0) for i in range(len(train_array))]
 #print train_examples
