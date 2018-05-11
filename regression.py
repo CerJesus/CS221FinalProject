@@ -15,7 +15,7 @@ def dotProduct(vec1, vec2):
 	for k, v in vec1.iteritems():
 		if k in vec2.keys():
 			dot += vec1[k] * vec2[k]
-	print dot 
+	#print dot 
 	return dot
 
 def increment(vec1, scale, vec2): 
@@ -29,10 +29,10 @@ def error(example, weights, true):
 	return math.pow((true - dotProduct(example, weights)), 2)
 
 def d_error(features, weights, trueVal):
-	#print example
+	#print dotProduct(features, weights), trueVal
 	gradient = {}
 	scale = 2*(dotProduct(features, weights) - trueVal)
-	print "scale", scale
+	#print "scale", scale
 	#print features
 	#print weights
 	increment(gradient, scale, features)
@@ -51,12 +51,13 @@ def learnRegression(examples, numIters, stepSize):
 
 			gradient = d_error(features, weights, y)
 			increment(weights, - stepSize, gradient)
+		print 100.0*i/numIters
 			#print weights
 
 	def predictor(x):
 		return dotProduct(featurize(x), weights)
 
-	print weights
+	#print weights
 	return predictor
 
 def featurize(x):
@@ -96,7 +97,7 @@ col_names = data_train.columns.tolist()[1:]
 train_array = data_train.as_matrix(columns=None)
 
 train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
-print train_examples[1][1]
+#print train_examples[1][1]
 '''for i in range(len(train_array)):
 	cur_x = ()
 	for j in range(len(train_array[i]) - 1):
@@ -111,7 +112,7 @@ test_array = data_test.as_matrix(columns=None)
 
 #test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
 
-logisticPredictor = learnRegression(train_examples, 1, 0.001)
+logisticPredictor = learnRegression(train_examples, 50, 0.00000000001)
 print "the training error for the regression is:", evaluatePredictor(logisticPredictor, train_examples)
 
 
