@@ -6,6 +6,9 @@ import pandas as pd
 
 
 def dotProduct(list1, list2):
+
+	if len(list1) != len(list2):
+		raise Exception('dotProduct error: list length dont match')
 	dot = 0
 	for i in len(list1):
 		dot += list1[i] * list2[i]
@@ -14,15 +17,22 @@ def dotProduct(list1, list2):
 def error(example, weights, true):
 	return math.pow((true - dotProduct(example, weights)), 2)
 
-def d_error(predicted, true)
+def d_error(example, weights, true):
+	print example
+	scale = 2*(dotProduct(example, weights) - true)
+	return [x * scale for x in example]
 
-def learnRegression(examples):
-	examples_map = {}
-	for x,y in examples:
-		examples_map[x] = y
+def learnRegression(examples, numIters, stepSize):
+	weights = [0 for i in range(len(examples[0]))]
+
+
+	for i in range(numIters):
+		for x, y in examples:
+			gradient = d_error(x, weights, y)
+			weights -= [stepSize * element for element in gradient]
 
 	def predictor(x):
-		return examples_map[x]
+		return dotProduct(x, tuple(weights))
 
 	return predictor
 
@@ -44,6 +54,7 @@ data_train = pd.read_csv(file_train)
 train_array = data_train.as_matrix(columns=None)
 
 train_examples = [ ( (train_array[i][j] for j in range(len(train_array[i]) - 1) ), train_array[i][80]/1000.0) for i in range(len(train_array))]
+print train_array
 '''for i in range(len(train_array)):
 	cur_x = ()
 	for j in range(len(train_array[i]) - 1):
@@ -57,4 +68,8 @@ data_test = pd.read_csv(file_test)
 test_array = data_test.as_matrix(columns=None)
 
 #test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
+
+logisticPredictor = learnRegression(train_examples, 100, 0.1)
+print "the training error for the regression is:", evaluatePredictor(logisticPredictor, train_examples)
+
 
