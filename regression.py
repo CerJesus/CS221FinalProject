@@ -6,11 +6,10 @@ import pandas as pd
 
 
 def dotProduct(list1, list2):
-
 	if len(list1) != len(list2):
 		raise Exception('dotProduct error: list length dont match')
 	dot = 0
-	for i in len(list1):
+	for i in range(len(list1)):
 		dot += list1[i] * list2[i]
 	return dot
 
@@ -18,16 +17,18 @@ def error(example, weights, true):
 	return math.pow((true - dotProduct(example, weights)), 2)
 
 def d_error(example, weights, true):
-	print example
+	#print example
 	scale = 2*(dotProduct(example, weights) - true)
 	return [x * scale for x in example]
 
 def learnRegression(examples, numIters, stepSize):
-	weights = [0 for i in range(len(examples[0]))]
-
+	#print examples[0]
+	weights = [0 for i in range(len(examples[0][0]))]
+	#print "weights", len(weights)
 
 	for i in range(numIters):
 		for x, y in examples:
+			print "x", len(x)
 			gradient = d_error(x, weights, y)
 			weights -= [stepSize * element for element in gradient]
 
@@ -53,8 +54,8 @@ data_train = pd.read_csv(file_train)
 #print(data_train.head())
 train_array = data_train.as_matrix(columns=None)
 
-train_examples = [ ( (train_array[i][j] for j in range(len(train_array[i]) - 1) ), train_array[i][80]/1000.0) for i in range(len(train_array))]
-print train_array
+train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][80]/1000.0) for i in range(len(train_array))]
+#print train_examples
 '''for i in range(len(train_array)):
 	cur_x = ()
 	for j in range(len(train_array[i]) - 1):
