@@ -5,6 +5,17 @@ import numpy
 import pandas as pd
 
 
+def dotProduct(list1, list2):
+	dot = 0
+	for i in len(list1):
+		dot += list1[i] * list2[i]
+	return dot
+
+def error(example, weights, true):
+	return math.pow((true - dotProduct(example, weights)), 2)
+
+def d_error(predicted, true)
+
 def learnRegression(examples):
 	examples_map = {}
 	for x,y in examples:
@@ -18,7 +29,7 @@ def learnRegression(examples):
 def evaluatePredictor(predictor, examples):
     '''
     predictor: a function that takes an x and returns a predicted y.
-    Given a list of examples (x, y), makes predictions based on |predict| and returns the average error
+    Given a list of examples (x, y), makes predictions based on |predictor| and returns the average error
     on the set of examples.
     '''
     error = 0.0
