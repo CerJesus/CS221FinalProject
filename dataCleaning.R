@@ -3,6 +3,10 @@ library(dplyr)
 
 setwd("~/Desktop/CS221/CS221FinalProject")
 
+# ====
+# Cleaning the training data
+# ====
+
 data = read.csv("train.csv")
 View(data)
 
@@ -23,6 +27,11 @@ data = data %>%
   mutate(LotFrontage = ifelse(is.na(LotFrontage), 0, LotFrontage)) %>% 
   mutate(GarageAge = ifelse(is.na(GarageAge), 0, GarageAge)) %>%
   mutate(MasVnrArea = ifelse(is.na(MasVnrArea), 0, MasVnrArea))
+# ====
+
+# ====
+# Adding neighborhood-specific data
+# ====
 
 unique(data$Neighborhood)
 
@@ -30,7 +39,50 @@ zed = data %>%
   group_by(Neighborhood) %>% 
   summarise(num = n())
 
-write.csv(zed, "neighborhoods_count.csv")
+neigh = read.csv("Neighborhood_Data.csv") %>% 
+  filter(X <= 25) %>% 
+  select(-X.1)
 
-write.csv(data, "train_updated.csv")
+neigh = neigh %>% 
+  mutate(Median_House_Income = as.numeric(gsub(",", "", Median_House_Income))/1000) %>% 
+  mutate(Median_House_Price = as.numeric(gsub(",", "", Median_House_Price))/1000)
+
+# Mean house price
+means = data %>% 
+  group_by(Neighborhood) %>% 
+  summarise(Mean_Price = mean(SalePriceThousands))
+View(means)
+
+# Standard deviation of house price
+std = data %>% 
+  group_by(Neighborhood) %>% 
+  summarise(Std_Price = sd(SalePriceThousands))
+View(std)
+
+# Median of house Price
+med = data %>% 
+  group_by(Neighborhood) %>% 
+  summarise(Median_Price = median(SalePriceThousands))
+View(med)
+
+neigh_data = merge(means, std, by="Neighborhood")
+neigh_data = merge(neigh_data, med, by="Neighborhood")
+neigh_data = merge(neigh, neigh_data, by="Neighborhood")
+neigh_data = neigh_data %>%
+  select(-Median_House_Price) %>% 
+  select(-X)
+View(neigh_data)
+write.csv(neigh_data, "Neighborhood_Data_Final.csv")
+
+# ====
+
+# ====
+# Combining the two data tables
+# ====
+
+zed = merge(data, neigh_data, by="Neighborhood")
+write.csv(zed, "data_house_and_neighborhood.csv")
+
+# ====
+
   
