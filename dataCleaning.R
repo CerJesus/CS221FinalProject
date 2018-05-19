@@ -24,5 +24,13 @@ data = data %>%
   mutate(GarageAge = ifelse(is.na(GarageAge), 0, GarageAge)) %>%
   mutate(MasVnrArea = ifelse(is.na(MasVnrArea), 0, MasVnrArea))
 
+unique(data$Neighborhood)
+
+zed = data %>% 
+  group_by(Neighborhood) %>% 
+  summarise(num = n())
+
+write.csv(zed, "neighborhoods_count.csv")
+
 write.csv(data, "train_updated.csv")
   
