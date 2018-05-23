@@ -54,16 +54,18 @@ def learnRegression(examples, numIters, stepSize):
 		print 100.0*i/numIters
 			#print weights
 
-    errsToBoost = []
-    for x, y in examples:
-        #print "x", len(x)
-        features = featurize(x)
-        errsToBoost.append(error(features,weights,y))
+	errsToBoost = []
 
-    weights2 = defaultdict(int)
-    for i in range(numIters):
+	for i in range(len(examples)):
+		x, y = examples[i]
+		features = featurize(x)
+		errsToBoost.append(y - dotProduct(features,weights))
+
+
+	weights2 = defaultdict(int)
+	for i in range(numIters):
 		for ind in range(len(examples)):
-            x = examples[ind][0]
+			x = examples[ind][0]
 			#print "x", len(x)
 			features = featurize(x)
 
@@ -129,5 +131,5 @@ test_array = data_test.as_matrix(columns=None)
 
 #test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
 
-logisticPredictor = learnRegression(train_examples, 50, 0.00000000001)
+logisticPredictor = learnRegression(train_examples, 10, 0.00000000001)
 print "the training error for the regression is:", evaluatePredictor(logisticPredictor, train_examples)

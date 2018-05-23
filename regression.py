@@ -112,7 +112,7 @@ test_array = data_test.as_matrix(columns=None)
 
 #test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
 
-logisticPredictor = learnRegression(train_examples, 50, 0.00000000001)
+logisticPredictor = learnRegression(train_examples, 10, 0.00000000001)
 print "the training error for the regression is:", evaluatePredictor(logisticPredictor, train_examples)
 
 
