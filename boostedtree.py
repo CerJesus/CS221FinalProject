@@ -6,7 +6,7 @@ import pandas as pd
 
 ### Global variables
 col_names = []
-NUM_TREES = 2
+NUM_TREES = 5
 
 ### Helper functions
 def dotProduct(vec1, vec2):
@@ -41,29 +41,38 @@ def d_error(features, weights, trueVal):
 
 def learnRegression(examples, numIters, stepSize):
     ### IN WITH THE NEW #################################
-    weights = [defaultdict(int) for _ in range(NUM_TREES)]
-    objectives = [cur[1] for cur in examples]
+	list_weights = [defaultdict(int) for _ in range(NUM_TREES)]
+	objectives = [cur[1] for cur in examples]
+	print len(list_weights), NUM_TREES
 
-    for curWeights in weights:
-        for i in range(numIters):
-    		for ind in range(len(examples)):
-                x = examples[ind][0]
-    			#print "x", len(x)
-    			features = featurize(x)
+	for k in range(NUM_TREES):
+		curWeights = defaultdict(int)
+		for i in range(numIters):
+			for ind in range(len(examples)):
+				x = examples[ind][0]
+				features = featurize(x)
+				gradient = d_error(features, curWeights, objectives[ind])
+				increment(curWeights, - stepSize, gradient)
+			print 100.0*i/numIters
+    	
+		list_weights[k] = curWeights
 
-    			gradient = d_error(features, curWeights, objectives[ind])
-    			increment(curWeights, - stepSize, gradient)
-    		print 100.0*i/numIters
-            objectives = []
-        	for i in range(len(examples)):
-        		x, y = examples[i]
-        		features = featurize(x)
-        		objectives.append(y - dotProduct(features,curWeights))
+		for j in range(len(examples)):
+			x, y = examples[j]
+			features = featurize(x)
+			objectives[j] = objectives[j] - dotProduct(features,curWeights)
+        	
+		print "progress: " , (k+1) , "out of", NUM_TREES, "trees"
 
+
+	def predictor(x):
+		return sum(dotProduct(featurize(x),curWeight) for curWeight in list_weights)
+
+	return predictor
 
     ### OUT WITH THE OLD ################################
     #print examples[0]
-	weights = defaultdict(int)
+	'''weights = defaultdict(int)
 	#print "weights", len(weights)
 
 	for i in range(numIters):
@@ -93,14 +102,14 @@ def learnRegression(examples, numIters, stepSize):
 
 			gradient = d_error(features, weights2, errsToBoost[ind])
 			increment(weights2, - stepSize, gradient)
-		print 100.0*i/numIters
+		print 100.0*i/numIters'''
 
-	def predictor(x):
-        return sum(dotProduct(featurize(x),curWeight) for curWeight in weights)
-		return dotProduct(featurize(x), weights) + dotProduct(featurize(x), weights2)
+	'''def predictor(x):
+		return sum(dotProduct(featurize(x),curWeight) for curWeight in list_weights)'''
+		#return dotProduct(featurize(x), weights) + dotProduct(featurize(x), weights2)
 
 	#print weights
-	return predictor
+	#return predictor
 
 def featurize(x):
 	features = defaultdict(int)
@@ -154,5 +163,5 @@ test_array = data_test.as_matrix(columns=None)
 
 #test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
 
-logisticPredictor = learnRegression(train_examples, 10, 0.00000000001)
-print "the training error for the regression is:", evaluatePredictor(logisticPredictor, train_examples)
+#logisticPredictor = learnRegression(train_examples, 10, 0.00000000001)
+#print "the training error for the regression is:", evaluatePredictor(logisticPredictor, train_examples)
