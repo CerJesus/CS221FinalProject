@@ -6,7 +6,7 @@ import pandas as pd
 
 ### Global variables
 col_names = []
-
+NUM_TREES = 2
 
 ### Helper functions
 def dotProduct(vec1, vec2):
@@ -40,7 +40,29 @@ def d_error(features, weights, trueVal):
 	return gradient
 
 def learnRegression(examples, numIters, stepSize):
-	#print examples[0]
+    ### IN WITH THE NEW #################################
+    weights = [defaultdict(int) for _ in range(NUM_TREES)]
+    objectives = [cur[1] for cur in examples]
+
+    for curWeights in weights:
+        for i in range(numIters):
+    		for ind in range(len(examples)):
+                x = examples[ind][0]
+    			#print "x", len(x)
+    			features = featurize(x)
+
+    			gradient = d_error(features, curWeights, objectives[ind])
+    			increment(curWeights, - stepSize, gradient)
+    		print 100.0*i/numIters
+            objectives = []
+        	for i in range(len(examples)):
+        		x, y = examples[i]
+        		features = featurize(x)
+        		objectives.append(y - dotProduct(features,curWeights))
+
+
+    ### OUT WITH THE OLD ################################
+    #print examples[0]
 	weights = defaultdict(int)
 	#print "weights", len(weights)
 
@@ -74,6 +96,7 @@ def learnRegression(examples, numIters, stepSize):
 		print 100.0*i/numIters
 
 	def predictor(x):
+        return sum(dotProduct(featurize(x),curWeight) for curWeight in weights)
 		return dotProduct(featurize(x), weights) + dotProduct(featurize(x), weights2)
 
 	#print weights
