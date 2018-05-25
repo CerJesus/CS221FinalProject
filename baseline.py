@@ -1,69 +1,84 @@
-#This is our baseline/oracle file
+# Beating the Bubble: Housing Prices in Ames, Iowa
+
+# Filename: baseline.py
+# Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+# Python 2.7
+
+# DESCRIPTION
+# This script evaluates the accuracy of a naive baseline predictor
+
 import math, random
 from collections import defaultdict
-import numpy
+import numpy  as np
 import pandas as pd
 
+# FUNCTIONS --------------------------------------------------------------------
 
+# BASELINE: Return the median sale price given an appropriate input tuple
 def learnBaseline(np_array):
-	train_results = [np_array[i][80] for i in range(len(np_array))]
-	#print(train_results)
-	numpy.sort(train_results)
-	median_test_data = train_results[len(train_results)/2 - 1]/1000.0
-	print(median_test_data)
+	sale_prices = [np_array[i][80] for i in range(len(np_array))]
+	np.sort(sale_prices)
+	median_sale_price = sale_prices[len(sale_prices) / 2 - 1] / 1000.0
 
-	def baselinePredictor(x):
-		return median_test_data
+	def baselinePredictor(input):
+		return median_sale_price
 
 	return baselinePredictor
 
-
+# ORACLE: Return the true sale price given an appropriate input tuple
 def learnOracle(examples):
 	examples_map = {}
-	for x,y in examples:
-		examples_map[x] = y
+	for input, output in examples:
+		examples_map[input] = output
 
 	def predictor(x):
 		return examples_map[x]
 
 	return predictor
 
+# PREDICTOR EVALUATION: Compute the mean squared error of a predictor function
+# given a matrix of examples
 def evaluatePredictor(predictor, examples):
-    '''
-    predictor: a function that takes an x and returns a predicted y.
-    Given a list of examples (x, y), makes predictions based on |predict| and returns the average error
-    on the set of examples.
-    '''
-    error = 0.0
-    for x, y in examples:
-        error += math.pow((predictor(x) - y), 2)
-    return error / len(examples)
+	error = 0.0
+	for input, output in examples:
+		error += (predictor(input) - output) ** 2
+	error /= len(examples)
+	return error
 
-## Processing training data
-file_train = 'train.csv'
-data_train = pd.read_csv(file_train)
-#print(data_train.head())
-train_array = data_train.as_matrix(columns=None)
-print train_array
+# COMPUTATION ------------------------------------------------------------------
 
-train_examples = [ ( (train_array[i][j] for j in range(len(train_array[i]) - 1) ), train_array[i][80]/1000.0) for i in range(len(train_array))]
-print len(train_examples)
-'''for i in range(len(train_array)):
-	cur_x = ()
-	for j in range(len(train_array[i]) - 1):
-		cur_x += (train_array[i][j], )
-	train_examples += (cur_x,   train_array[i][80])'''
+# Import the training data into a numpy matrix
+file_train  = 'train.csv'
+data_train  = pd.read_csv(file_train)
+train_array = data_train.as_matrix(columns = None)
 
-## Processing testing data
-file_test = 'test.csv'
-data_test = pd.read_csv(file_test)
-#print(data.head())
+# Import the test data into a numpy matrix
+file_test  = 'test.csv'
+data_test  = pd.read_csv(file_test)
 test_array = data_test.as_matrix(columns=None)
 
-#test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
+# Format the training data as a list of (input, output) tuples
+train_examples = []
+for i in range(len(train_array)):
+	input_size = range(len(train_array[i]) - 1)
+	input      = (train_array[i][j] for j in input_size)
+	output	   = train_array[i][80] / 1000.0
+	train_examples.append((input, output))
 
-baseline = learnBaseline(train_array)
+# Define predictor functions for baseline and oracle
+baseline     = learnBaseline(train_array)
 oracle_train = learnOracle(train_examples)
 
-print "baseline average train error:", evaluatePredictor(baseline, train_examples)
-print "oracle average train error:", evaluatePredictor(oracle_train, train_examples)
+# Evaluate mean squared error of predictors
+baseline_error = evaluatePredictor(baseline, train_examples)
+oracle_error   = evaluatePredictor(oracle_train, train_examples)
+
+# Print the results
+print ""
+print "--------"
+print "BASELINE"
+print "--------"
+print "Number of examples:    ", len(train_examples)
+print "Baseline (median) MSE: ", baseline_error
+print "Oracle MSE:            ", oracle_error
+print ""
