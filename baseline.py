@@ -1,11 +1,13 @@
-# Beating the Bubble: Housing Prices in Ames, Iowa
+"""
+Beating the Bubble: Housing Prices in Ames, Iowa
 
-# Filename: baseline.py
-# Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
-# Python 2.7
+Filename: baseline.py
+Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Python 2.7
 
-# DESCRIPTION
-# This script evaluates the accuracy of a naive baseline predictor
+DESCRIPTION
+This script evaluates the accuracy of a naive baseline predictor
+"""
 
 import math, random
 from collections import defaultdict
