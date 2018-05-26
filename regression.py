@@ -14,92 +14,87 @@ import math, random
 from collections import defaultdict
 import numpy  as np
 import pandas as pd
-from util import dotProduct, increment, evaluatePredictor, csvAsArray
+from util import dotProduct, increment, evaluatePredictor, csvAsArray, \
+        getCsvHeaders
 
 # LEARNING FUNCTIONS -----------------------------------------------------------
 
-### Global variables
-col_names = []
+# LOSS GRADIENT: Return the gradient of the training loss with respect to the
+# weight vector for a given example (features, true_value)
+def lossGradient(features, weights, true_value):
+    gradient = {}
+    scale = 2 * (dotProduct(features, weights) - true_value)
+    increment(gradient, scale, features)
+    return gradient
 
-# 
-def error(example, weights, true):
-    return (true - dotProduct(example, weights)) ** 2
-
-def d_error(features, weights, trueVal):
-	gradient = {}
-	scale = 2*(dotProduct(features, weights) - trueVal)
-	increment(gradient, scale, features)
-	return gradient
-
-# REGRESSION: Perform linear regression and return the predicted sale price
-# given an input tuple
+# REGRESSION: Learn a linear regression model and return the predicted sale
+# price given an input tuple
 def learnRegression(examples, numIters, stepSize):
-	weights = defaultdict(int)
+    weights = defaultdict(int)
 
-	for i in range(numIters):
-		for x, y in examples:
-			#print "x", len(x)
-			features = featurize(x)
+    print ""
+    for i in range(numIters):
+        for x, y in examples:
+            gradient = lossGradient(x, weights, y)
+            increment(weights, -stepSize, gradient)
+        print "Training progress: " + str(100.0 * (i + 1) / numIters) + "%"
 
-			gradient = d_error(features, weights, y)
-			increment(weights, - stepSize, gradient)
-		print 100.0*i/numIters
-			#print weights
+    def predictor(x):
+        return dotProduct(x, weights)
 
-	def predictor(x):
-		return dotProduct(featurize(x), weights)
+    return predictor
 
-	#print weights
-	return predictor
-
-# FEATURIZE
-def featurize(x):
+# FEATURIZE: Given a feature vector, return an updated feature vector (in the
+# form of a dict). Turns enumerated string features into unique indicator
+# features.
+def featurize(feature_values, feature_names):
     features = defaultdict(int)
-    for i in range(len(x)):
-	if type(x[i]) == str:
-	    #add an indicator feature
-	    features[col_names[i] + x[i]] = 1
+    for i in range(len(feature_values)):
 
-	elif math.isnan(x[i]):
-	    features[col_names[i] + 'NA'] = 1
+        # Case 1: string -> indicator
+        if type(feature_values[i]) == str:
+            features[feature_names[i] + feature_values[i]] = 1
 
-	else:
-	    #add the number itself as our feature value
-	    features[col_names[i]] = x[i]
-	
+        # Case 2: no value -> NA indicator
+        elif math.isnan(feature_values[i]):
+            features[feature_names[i] + 'NA'] = 1
+
+        # Case 3: already an int -> no change
+        else:
+            features[feature_names[i]] = feature_values[i]
+
     return features
 
 # COMPUTATION ------------------------------------------------------------------
 
-# Import the training and test data as numpy arrays
-train_array = csvAsArray('train_updated.csv')
-test_array  = csvAsArray('test.csv')
+def trainAndTest():
 
-data_train = pd.read_csv('train_updated.csv')
-col_names  = data_train.columns.tolist()[1:]
-#print test_array.dtype.names
+    # Import the training and test data as numpy arrays
+    train_array = csvAsArray('train_updated.csv')
+    test_array  = csvAsArray('test.csv')
 
-train_examples = []
-for i in range(len(train_array)):
-    input_size = range(len(train_array[i]) - 1)
-    input_data = [train_array[i][j] for j in input_size]
-    output     = train_array[i][len(train_array[0]) - 1]
-    train_examples.append((input_data, output))
+    # Generate a list of (feature vector, value) tuples for the training data
+    feature_names = getCsvHeaders('train_updated.csv')
+    train_examples = []
+    for i in range(len(train_array)):
+        feature_count  = range(len(train_array[i]) - 1)
+        feature_values = [train_array[i][j] for j in feature_count]
+        feature_vector = featurize(feature_values, feature_names)
+        output         = train_array[i][len(train_array[0]) - 1]
+        train_examples.append((feature_vector, output))
 
+    # Train a regression model on the training data and evaluate its mean
+    # squared error with the test data
+    regressionPredictor = learnRegression(train_examples, 10, 0.00000000001)
+    regression_error    = evaluatePredictor(regressionPredictor, train_examples)
 
-"""
-train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
-"""
+    # Print the results
+    print ""
+    print "----------"
+    print "REGRESSION"
+    print "----------"
+    print "Number of examples: ", len(train_examples)
+    print "Regression MSE:     ", regression_error
+    print ""
 
-# Evaluate the mean squared error of regression
-regressionPredictor = learnRegression(train_examples, 10, 0.00000000001)
-regression_error    = evaluatePredictor(regressionPredictor, train_examples)
-
-# Print the results
-print ""
-print "----------"
-print "REGRESSION"
-print "----------"
-print "Number of examples: ", len(train_examples)
-print "Regression MSE:     ", regression_error
-print ""
+trainAndTest()

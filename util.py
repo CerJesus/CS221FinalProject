@@ -45,8 +45,14 @@ def evaluatePredictor(predictor, examples):
 
 # DATA IMPORT ------------------------------------------------------------------
 
-# IMPORT DATA: Takes the filename of a csv and returns a numpy array
+# IMPORT DATA: Takes the filename of a csv and returns the data as a numpy array
 def csvAsArray(data_file):
-    data       = pd.read_csv(data_file, header=0)
+    data = pd.read_csv(data_file)
     data_array = data.values
     return data_array
+
+# HEADERS: Takes the filename of a csv and returns its headers
+def getCsvHeaders(data_file):
+    data = pd.read_csv(data_file)
+    headers = data.columns.values[1:]
+    return headers

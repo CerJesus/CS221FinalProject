@@ -42,32 +42,36 @@ def learnOracle(examples):
 
 # COMPUTATION ------------------------------------------------------------------
 
-# Import the training and test data as numpy matrices
-train_array = csvAsArray('train.csv')
-test_array  = csvAsArray('test.csv')
+def trainAndTest():
 
-# Format the training data as a list of (input, output) tuples
-train_examples = []
-for i in range(len(train_array)):
-    input_size = range(len(train_array[i]) - 1)
-    input_data = (train_array[i][j] for j in input_size)
-    output     = train_array[i][80] / 1000.0
-    train_examples.append((input_data, output))
+    # Import the training and test data as numpy matrices
+    train_array = csvAsArray('train.csv')
+    test_array  = csvAsArray('test.csv')
 
-# Define predictor functions for baseline and oracle
-baseline     = learnBaseline(train_array)
-oracle_train = learnOracle(train_examples)
+    # Format the training data as a list of (input, output) tuples
+    train_examples = []
+    for i in range(len(train_array)):
+        input_size = range(len(train_array[i]) - 1)
+        input_data = (train_array[i][j] for j in input_size)
+        output     = train_array[i][80] / 1000.0
+        train_examples.append((input_data, output))
 
-# Evaluate mean squared error of predictors
-baseline_error = evaluatePredictor(baseline, train_examples)
-oracle_error   = evaluatePredictor(oracle_train, train_examples)
+    # Define predictor functions for baseline and oracle
+    baseline     = learnBaseline(train_array)
+    oracle_train = learnOracle(train_examples)
 
-# Print the results
-print ""
-print "-------------------"
-print "BASELINE AND ORACLE"
-print "-------------------"
-print "Number of examples:    ", len(train_examples)
-print "Baseline (median) MSE: ", baseline_error
-print "Oracle MSE:            ", oracle_error
-print ""
+    # Evaluate mean squared error of predictors
+    baseline_error = evaluatePredictor(baseline, train_examples)
+    oracle_error   = evaluatePredictor(oracle_train, train_examples)
+
+    # Print the results
+    print ""
+    print "-------------------"
+    print "BASELINE AND ORACLE"
+    print "-------------------"
+    print "Number of examples:    ", len(train_examples)
+    print "Baseline (median) MSE: ", baseline_error
+    print "Oracle MSE:            ", oracle_error
+    print ""
+
+trainAndTest()
