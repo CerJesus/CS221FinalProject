@@ -24,21 +24,21 @@ def learnBaseline(np_array):
     np.sort(sale_prices)
     median_sale_price = sale_prices[len(sale_prices) / 2 - 1] / 1000.0
 
-    def baselinePredictor(input):
-	return median_sale_price
+    def baselinePredictor(x):
+        return median_sale_price
 
     return baselinePredictor
 
 # ORACLE: Return the true sale price given an appropriate input tuple
 def learnOracle(examples):
     examples_map = {}
-    for input, output in examples:
-	examples_map[input] = output
+    for x, y in examples:
+        examples_map[x] = y
 
-    def predictor(x):
-	return examples_map[x]
+    def oraclePredictor(x):
+        return examples_map[x]
 
-    return predictor
+    return oraclePredictor
 
 # COMPUTATION ------------------------------------------------------------------
 

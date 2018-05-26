@@ -16,21 +16,21 @@ import pandas as pd
 
 # VECTOR FUNCTIONS -------------------------------------------------------------
 
-# DOT PRODUCT: Compute the dot product of two numpy vectors
+# DOT PRODUCT: Return the dot product of two numpy vectors
 def dotProduct(vec1, vec2):
     dot_product = 0
     for key, value in vec1.iteritems():
-	if key in vec2.keys():
-	    dot_product += vec1[key] * vec2[key]
+        if key in vec2.keys():
+            dot_product += vec1[key] * vec2[key]
     return dot_product
 
 # INCREMENT: Increment a vector (vec1 += scale * vec2)
 def increment(vec1, scale, vec2):
     for key, value in vec2.items():
-	if key in vec1.keys():
-	    vec1[key] += scale * vec2[key]
-	else:
-	    vec1[key] = scale * vec2[key]
+        if key in vec1.keys():
+            vec1[key] += scale * vec2[key]
+        else:
+            vec1[key] = scale * vec2[key]
 
 # PREDICTOR FUNCTIONS ----------------------------------------------------------
 
@@ -39,7 +39,7 @@ def increment(vec1, scale, vec2):
 def evaluatePredictor(predictor, examples):
     error = 0.0
     for input, output in examples:
-	error += (predictor(input) - output) ** 2
+        error += (predictor(input) - output) ** 2
     error /= len(examples)
     return error
 

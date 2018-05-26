@@ -16,7 +16,7 @@ import numpy  as np
 import pandas as pd
 from util import dotProduct, increment, evaluatePredictor, csvAsArray
 
-# FUNCTIONS --------------------------------------------------------------------
+# LEARNING FUNCTIONS -----------------------------------------------------------
 
 ### Global variables
 col_names = []
@@ -31,7 +31,8 @@ def d_error(features, weights, trueVal):
 	increment(gradient, scale, features)
 	return gradient
 
-# REGRESSION: Perform a linear regression 
+# REGRESSION: Perform linear regression and return the predicted sale price
+# given an input tuple
 def learnRegression(examples, numIters, stepSize):
 	weights = defaultdict(int)
 
