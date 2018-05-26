@@ -1,167 +1,119 @@
-#This is our logistic regression file
+"""
+Beating the Bubble: Housing Prices in Ames, Iowa
+
+Filename: boosted-regression.py
+Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Python 2.7
+
+DESCRIPTION
+This script defines a standard linear regression predictor and evaluates its
+mean squared error.
+"""
+
 import math, random
 from collections import defaultdict
-import numpy
+import numpy  as np
 import pandas as pd
+from util import dotProduct, increment, evaluatePredictor, csvAsArray, \
+        getCsvHeaders
 
-### Global variables
-col_names = []
+# LEARNING FUNCTIONS -----------------------------------------------------------
+
 NUM_TREES = 5
 
-### Helper functions
-def dotProduct(vec1, vec2):
-	dot = 0
-	#print vec2
-	for k, v in vec1.iteritems():
-		if k in vec2.keys():
-			dot += vec1[k] * vec2[k]
-	#print dot
-	return dot
+# LOSS GRADIENT: Return the gradient of the training loss with respect to the
+# weight vector for a given example (features, true_value)
+def lossGradient(features, weights, true_value):
+    gradient = {}
+    scale = 2 * (dotProduct(features, weights) - true_value)
+    increment(gradient, scale, features)
+    return gradient
 
-def increment(vec1, scale, vec2):
-	for f, v in vec2.items():
-		if f in vec1.keys():
-			vec1[f] += scale * vec2[f]
-		else:
-			vec1[f] = scale * vec2[f]
+# BOOSTED REGRESSION: Learn a linear regression model using boosted trees and
+# return the predicted sale price given an input tuple
+def learnBoostedRegression(examples, numIters, stepSize):
+    list_weights = [defaultdict(int) for _ in range(NUM_TREES)]
+    objectives = [cur[1] for cur in examples]
+    #print len(list_weights), NUM_TREES
 
-def error(example, weights, true):
-	return math.pow((true - dotProduct(example, weights)), 2)
-
-def d_error(features, weights, trueVal):
-	#print dotProduct(features, weights), trueVal
-	gradient = {}
-	scale = 2*(dotProduct(features, weights) - trueVal)
-	#print "scale", scale
-	#print features
-	#print weights
-	increment(gradient, scale, features)
-	#print gradient
-	return gradient
-
-def learnRegression(examples, numIters, stepSize):
-    ### IN WITH THE NEW #################################
-	list_weights = [defaultdict(int) for _ in range(NUM_TREES)]
-	objectives = [cur[1] for cur in examples]
-	print len(list_weights), NUM_TREES
-
-	for k in range(NUM_TREES):
-		curWeights = defaultdict(int)
-		for i in range(numIters):
-			for ind in range(len(examples)):
-				x = examples[ind][0]
-				features = featurize(x)
-				gradient = d_error(features, curWeights, objectives[ind])
-				increment(curWeights, - stepSize, gradient)
-			print 100.0*i/numIters
+    for k in range(NUM_TREES):
+        print ""
+        print "TREE " + str(k + 1) + " OF " + str(NUM_TREES)
+        curWeights = defaultdict(int)
+        for i in range(numIters):
+            for ind in range(len(examples)):
+                x = examples[ind][0]
+                gradient = lossGradient(x, curWeights, objectives[ind])
+                increment(curWeights, - stepSize, gradient)
+            print "Training progress: " + str(100.0 * (i + 1) /numIters) + "%"
     	
-		list_weights[k] = curWeights
+        list_weights[k] = curWeights
 
-		for j in range(len(examples)):
-			x, y = examples[j]
-			features = featurize(x)
-			objectives[j] = objectives[j] - dotProduct(features,curWeights)
+        for j in range(len(examples)):
+            x, y = examples[j]
+            objectives[j] = objectives[j] - dotProduct(x, curWeights)
         	
-		print "progress: " , (k+1) , "out of", NUM_TREES, "trees"
+        print "COMPLETE"
 
+    def predictor(x):
+        return sum(dotProduct(x, curWeight) for curWeight in list_weights)
 
-	def predictor(x):
-		return sum(dotProduct(featurize(x),curWeight) for curWeight in list_weights)
+    return predictor
 
-	return predictor
+# FEATURIZE: Given a feature vector, return an updated feature vector (in the
+# form of a dict). Turns enumerated string features into unique indicator
+# features.
+def featurize(feature_values, feature_names):
+    features = defaultdict(int)
+    print ""
+    for i in range(len(feature_values)):
 
-    ### OUT WITH THE OLD ################################
-    #print examples[0]
-	'''weights = defaultdict(int)
-	#print "weights", len(weights)
+        # Case 1: string -> indicator
+        if type(feature_values[i]) == str:
+            features[feature_names[i] + feature_values[i]] = 1
 
-	for i in range(numIters):
-		for x, y in examples:
-			#print "x", len(x)
-			features = featurize(x)
+        # Case 2: no value -> NA indicator
+        elif math.isnan(feature_values[i]):
+            features[feature_names[i] + 'NA'] = 1
 
-			gradient = d_error(features, weights, y)
-			increment(weights, - stepSize, gradient)
-		print 100.0*i/numIters
-			#print weights
+        # Case 3: already an int -> no change
+        else:
+            features[feature_names[i]] = feature_values[i]
 
-	errsToBoost = []
+    return features
 
-	for i in range(len(examples)):
-		x, y = examples[i]
-		features = featurize(x)
-		errsToBoost.append(y - dotProduct(features,weights))
+# COMPUTATION ------------------------------------------------------------------
 
+def trainAndTest():
 
-	weights2 = defaultdict(int)
-	for i in range(numIters):
-		for ind in range(len(examples)):
-			x = examples[ind][0]
-			#print "x", len(x)
-			features = featurize(x)
+    # Import the training and test data as numpy arrays
+    train_array = csvAsArray('train_updated.csv')
+    test_array  = csvAsArray('test.csv')
 
-			gradient = d_error(features, weights2, errsToBoost[ind])
-			increment(weights2, - stepSize, gradient)
-		print 100.0*i/numIters'''
+    # Generate a list of (feature vector, value) tuples for the training data
+    feature_names = getCsvHeaders('train_updated.csv')
+    train_examples = []
+    for i in range(len(train_array)):
+        feature_count  = range(len(train_array[i]) - 1)
+        feature_values = [train_array[i][j] for j in feature_count]
+        feature_vector = featurize(feature_values, feature_names)
+        output         = train_array[i][len(train_array[0]) - 1]
+        train_examples.append((feature_vector, output))
 
-	'''def predictor(x):
-		return sum(dotProduct(featurize(x),curWeight) for curWeight in list_weights)'''
-		#return dotProduct(featurize(x), weights) + dotProduct(featurize(x), weights2)
+    # Train a regression model on the training data and evaluate its mean
+    # squared error with the test data
+    boostedRegressionPredictor = learnBoostedRegression(train_examples, 10, \
+            0.00000000001)
+    regression_error = evaluatePredictor(boostedRegressionPredictor, \
+            train_examples)
 
-	#print weights
-	#return predictor
+    # Print the results
+    print ""
+    print "------------------"
+    print "BOOSTED REGRESSION"
+    print "------------------"
+    print "Number of examples: " + str(len(train_examples))
+    print "Regression MSE:     " + str(regression_error)
+    print ""
 
-def featurize(x):
-	features = defaultdict(int)
-
-	for i in range(len(x)):
-		#print type(x[i]), x[i]
-		if type(x[i]) == str:
-			#add an indicator feature
-			features[col_names[i] + x[i]] = 1
-		elif math.isnan(x[i]):
-			features[col_names[i] + 'NA'] = 1
-		else:
-			#add the number itself as our feature value
-			features[col_names[i]] = x[i]
-
-	#print features
-	return features
-
-def evaluatePredictor(predictor, examples):
-    '''
-    predictor: a function that takes an x and returns a predicted y.
-    Given a list of examples (x, y), makes predictions based on |predictor| and returns the average error
-    on the set of examples.
-    '''
-    error = 0.0
-    for x, y in examples:
-        error += math.pow((predictor(x) - y), 2)
-    return error / len(examples)
-
-## Processing training data
-file_train = 'train_updated.csv'
-data_train = pd.read_csv(file_train)
-col_names = data_train.columns.tolist()[1:]
-
-#print(data_train.head())
-train_array = data_train.as_matrix(columns=None)
-
-train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
-#print train_examples[1][1]
-'''for i in range(len(train_array)):
-	cur_x = ()
-	for j in range(len(train_array[i]) - 1):
-		cur_x += (train_array[i][j], )
-	train_examples += (cur_x,   train_array[i][80])'''
-
-## Processing testing data
-file_test = 'test.csv'
-data_test = pd.read_csv(file_test)
-#print(data.head())
-test_array = data_test.as_matrix(columns=None)
-
-#test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
-
-#logisticPredictor = learnRegression(train_examples, 10, 0.00000000001)
-#print "the training error for the regression is:", evaluatePredictor(logisticPredictor, train_examples)
+trainAndTest()

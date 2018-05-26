@@ -32,7 +32,7 @@ def increment(vec1, scale, vec2):
         else:
             vec1[key] = scale * vec2[key]
 
-# PREDICTOR FUNCTIONS ----------------------------------------------------------
+# MODEL TESTING FUNCTIONS ------------------------------------------------------
 
 # PREDICTOR EVALUATION: Compute the mean squared error of a predictor function
 # given a matrix of examples
