@@ -63,7 +63,7 @@ def kmeans(full_examples, K, maxIters):
             cluster_count[assign[j]] += 1
 
             loss_list[j] = (full_examples[j][1] - centroid_vals[assign[j]])
-            loss += loss_list[j]
+            loss += dist
         print "LOSS: " + str(loss)
     	if assign == prev_assign:
             print loss
@@ -129,14 +129,14 @@ def trainAndTest():
     # Train a k-means model on the training data and evaluate its mean
     # squared error with the test data
 
-    (centroids, assign, loss, loss_list, centroid_vals) = kmeans(train_examples, NUM_CLUSTERS, 500)
-    pickle.dump((centroids, assign, loss, loss_list, centroid_vals), open("centroids.p","wb"))
+    #(centroids, assign, loss, loss_list, centroid_vals) = kmeans(train_examples, NUM_CLUSTERS, 500)
+    #pickle.dump((centroids, assign, loss, loss_list, centroid_vals), open("centroids.p","wb"))
 
-    #(centroids, assign, loss, loss_list, centroid_vals) = pickle.load(open("centroids.p","rb"))
+    (centroids, assign, loss, loss_list, centroid_vals) = pickle.load(open("centroids.p","rb"))
 
     boostedExamples = [(k_examples[j],loss_list[j]) for j in range(len(k_examples))]
 
-    boostedRegPredictor = learnBoostedRegression(boostedExamples, 10, \
+    boostedRegPredictor = learnBoostedRegression(boostedExamples, 500, \
             0.00000000001, num_trees=NUM_B_TREES)
 
     #pickle.dump(boostedRegPredictor, open("kmeansboosted.p","wb"))
