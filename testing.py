@@ -21,10 +21,10 @@ from copy import copy
 #import kmeans
 
 ## CONSTANTS
-SGD_ITERS = 50
+SGD_ITERS = 10
 ETA = 0.00000000001
 NUM_SPLITS = 10
-NUM_TREES = 5
+NUM_TREES = 2
 
 # R SQUARED: Compute the r-squared value
 def r_squared(examples, predictor):
@@ -122,6 +122,7 @@ def forward_selection():
 	col_names_left = copy(col_names)
 	p = len(featurized_examples[0][0])
 	examples_list = [(defaultdict(int) , featurized_examples[j][1]) for j in range(p)]
+	current_list = [(defaultdict(int) , featurized_examples[j][1]) for j in range(p)]
 
 
 	for k in range(p):
@@ -134,13 +135,14 @@ def forward_selection():
 				first_entry = examples_list[i][0]
 				for feature_name, value in featurized_examples[i][0].iteritems():
 					if var_name in feature_name:
-						first_entry[var_name] = featurized_examples[i][0][feature_name]
+						first_entry[feature_name] = featurized_examples[i][0][feature_name]
+				util.increment(first_entry, 1, current_list[i][0])
 				examples_list[i] = (first_entry, examples_list[i][1])
 
 			#print examples_list
 			predictor = boostedtree.learnBoostedRegression(examples_list, SGD_ITERS, ETA, NUM_TREES)
 
-			#compute  r^2
+			#compute r^2
 			r_sq = r_squared(examples_list, predictor)
 			print r_sq
 
@@ -160,6 +162,15 @@ def forward_selection():
 		features_order.append(col_names_left[max_ind])
 		col_names_left.pop(max_ind)
 		best_r_list.append(max_val)
+		
+		# adding the features to the current list
+		for i in range(len(current_list)):
+			first_entry = current_list[i][0]
+			for feature_name, value in featurized_examples[i][0].iteritems():
+				if features_order[len(features_order) - 1] in feature_name:
+					first_entry[feature_name] = featurized_examples[i][0][feature_name]
+				current_list[i] = (first_entry, current_list[i][1])
+
 
 		print "We have considered ", (k+1), " out of ", (p-1), "variables"
 	#select the best model out of the list of predictors
