@@ -1,4 +1,15 @@
-#This is our logistic regression file
+"""
+Beating the Bubble: Housing Prices in Ames, Iowa
+
+Filename: testing.py
+Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Python 2.7
+
+DESCRIPTION
+This script generates a validation set, trains a model, and evaluates its
+error. Cross-validation is also enabled.
+"""
+
 import math, random
 from collections import defaultdict
 import numpy
@@ -65,7 +76,7 @@ train_array = data_train.as_matrix(columns=None)
 
 train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
 
-## split the data, train and test
+## split the data, train and evaluation 
 random.shuffle(train_examples)
 for i in range(NUM_SPLITS):
 	startTest = i*len(train_examples)/NUM_SPLITS
