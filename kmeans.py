@@ -6,6 +6,10 @@ import math
 import sys
 import util
 
+NUM_B_TREES = 1
+
+NUM_CLUSTERS = 15
+
 def kmeans(examples, K, maxIters):
     '''
     examples: list of examples, each example is a string-to-double dict representing a sparse vector.
@@ -22,11 +26,11 @@ def kmeans(examples, K, maxIters):
     	min_dist = 1,000
     	for i in range(K):
     		cur_dist = precomputed_x[ex_index] - 2*util.dotProduct(centroids[i], example) + precomputed_quantities[i]
-    		if cur_dist < min_dist: 
+    		if cur_dist < min_dist:
     			assign = i
     			min_dist = cur_dist
     	return assign, min_dist
-    
+
     def divide(vec, scale):
     	for k, v in vec.items():
     		vec[k] = 1.0 * v/scale
@@ -34,7 +38,7 @@ def kmeans(examples, K, maxIters):
     rand_list = random.sample(xrange(len(examples)), K)
     centroids = [examples[i] for i in rand_list]
     assign = [0 for _ in range(len(examples))]
-
+    loss_list = [0 for _ in range(len(examples))]
     precomputed_x = [util.dotProduct(examples[i], examples[i]) for i in range(len(examples))]
 
     for i in range(maxIters):
@@ -49,25 +53,27 @@ def kmeans(examples, K, maxIters):
 
     	#loop through the examples to assign
     	for j in range(len(examples)):
-    		assign[j] , dist = find_center(j, examples[j], precomputed_x, precomputed_quantities, centroids)
-    		loss += dist
-    		util.increment(means[assign[j]], 1, examples[j])
-    		cluster_count[assign[j]] += 1
+            assign[j] , dist = find_center(j, examples[j], precomputed_x, precomputed_quantities, centroids)
+            loss += dist
+            util.increment(means[assign[j]], 1, examples[j])
+            cluster_count[assign[j]] += 1
+
+            loss_list[j] = loss
 
     	if assign == prev_assign:
             print loss
-            return centroids, assign, loss
+            return centroids, assign, loss, loss_list
 
     	for index in range(K):
     		divide(means[index], cluster_count[index])
     	centroids = means
-        
+
     	if centroids == prev_centroids:
             print loss
-            return centroids, assign, loss
+            return centroids, assign, loss, loss_list
 
     print "The reconstruction loss is:", loss
-    return centroids, assign, loss
+    return centroids, assign, loss, loss_list
     #raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
@@ -115,7 +121,28 @@ def trainAndTest():
     # Train a k-means model on the training data and evaluate its mean
     # squared error with the test data
 
-    (centroids, assign, loss) = kmeans(k_examples, 15, 500)
+    (centroids, assign, loss, loss_list) = kmeans(k_examples, NUM_CLUSTERS, 500)
+
+    boostedExamples = [(k_examples[j][0],loss_list[j]) for j in range(len(k_examples))]
+
+    boostedRegPredictor = boostedtree.learnBoostedRegression(boostedExamples, NUM_B_TREES, \
+            0.00000000001, num_trees=5)
+
+    pre_computed_centroid_dots = [util.dotProduct(centroids[i],centroids[i]) for i in range(NUM_CLUSTERS)]
+    def kmeanspredictor(x):
+        assign = 0
+    	min_dist = 1,000
+    	for i in range(NUM_CLUSTERS):
+    		cur_dist = util.dotProduct(x,x) - 2*util.dotProduct(centroids[i], example) + pre_computed_centroid_dots[i]
+    		if cur_dist < min_dist:
+    			assign = i
+    			min_dist = cur_dist
+        return centroids[assign]
+
+    def boostedKPredictor(x):
+        return kmeanspredictor(x) + boostedRegPredictor(x)
+
+    avgError = util.evaluatePredictor(boostedKPredictor,boostedExamples)
 #print centroids, assign, loss
 
     # Print the results
@@ -126,6 +153,7 @@ def trainAndTest():
     print "Number of examples: " + str(len(k_examples))
     print "Reconstruction loss: " + str(loss)
     print "Average reconstruction loss: " + str(loss/len(k_examples))
+    print "Boosted average: " + str(avgError)
     print ""
 
 trainAndTest()
