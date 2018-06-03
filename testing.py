@@ -42,26 +42,29 @@ def r_squared(examples, predictor, model):
 	return 1 - (prediction_error/variance)
 
 
-def find_feature_values(examples):
+def find_feature_values(examples, col_names):
 	
 	r_adj_list = []
-	for i in range(len(examples[i][0])):
+	for i in range(len(col_names)):
 		#remove the feature
-		modified_examples = examples[:]
+		modified_examples = copy(examples)
 		for j in range(len(modified_examples)):
-			modified_examples[j][0].remove(i)
+			#modified_examples[j][0].remove(i)
+			cur = modified_examples[j][0]
+			if col_names[i] in cur: cur.pop(col_names[i])
 
 		#train a model
-		boostedtree.learnRegression(modified_examples, SGD_ITERS, ETA)
+		predictor = boostedtree.learnBoostedRegression(modified_examples, SGD_ITERS, ETA, NUM_TREES)
 
 		#compute the adjusted r^2
 		n = len(examples)
 		k = len(modified_examples[i][0])
-		r_sq = r_squared(modified_examples, predictor, boostedtree)
-		r_sq_adj = 1 - (1 - r_sq)((n-1)/(n - k - 1))
+		r_sq = r_squared(modified_examples, predictor)
+		r_sq_adj = 1 - (1 - r_sq)*((n-1)/(n - k - 1))
 
 		#store it
 		r_adj_list.append(r_sq_adj)
+		print "Removed variable ", (i+1), " out of ", (len(col_names) - 1)
 
 	return r_adj_list
 
@@ -75,14 +78,57 @@ train_array = data_train.as_matrix(columns=None)
 
 train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
 
+## Processing training data
+file_train = 'train_updated.csv'
+data_train = pd.read_csv(file_train)
+col_names = data_train.columns.tolist()[1:]
+
+train_array = data_train.as_matrix(columns=None)
+
+train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
+
+featurized_examples = [ (util.featurize(train_examples[i][0], col_names), train_examples[i][1]) for i in range(len(train_examples))]
+
+## evaluate the value of different features
+def orderFeatures():
+	n = len(col_names)
+	train_copy = copy(featurized_examples)
+	col_names_cpy = col_names[:]
+	r_sq = []
+	order = []
+
+	for i in range(n):
+		r_adj_list = find_feature_values(train_copy, col_names_cpy)
+		worst = -1
+		min_val = 100
+		for j in range(len(r_adj_list)):
+			if min_val > r_adj_list[j]:
+				worst = j
+				min_val = r_adj_list[j]
+
+		worst_feature = col_names_cpy[worst]
+		col_names_cpy.pop(worst)
+		order.append(worst)
+
+		for j in range(len(train_copy)):
+				#train_copy[j][0].remove(worst_feature)
+				cur = train_copy[j][0]
+				if worst_feature in cur:
+					cur.pop(worst_feature)
+
+		print r_adj_list
+
+	print order
+
 ## split the data, train and evaluation 
-random.shuffle(train_examples)
-for i in range(NUM_SPLITS):
-	startTest = i*len(train_examples)/NUM_SPLITS
-	endTest = (i+1)*len(train_examples)/NUM_SPLITS
-	currentTrainExamples = train_examples[0:startTest] + train_examples[endTest:len(train_examples)]
-	logisticPredictor = boostedtree.learnRegression(currentTrainExamples, SGD_ITERS, ETA)
-	print "leaving out the", (i+1), "the segment of the data, the validation error for the regression is:", boostedtree.evaluatePredictor(logisticPredictor, train_examples[startTest:endTest])
+def testTrees():
+	random.shuffle(featurized_examples)
+	for i in range(NUM_SPLITS):
+		startTest = i*len(featurized_examples)/NUM_SPLITS
+		endTest = (i+1)*len(featurized_examples)/NUM_SPLITS
+		currentTrainExamples = featurized_examples[0:startTest] + featurized_examples[endTest:len(featurized_examples)]
+		logisticPredictor = boostedtree.learnRegression(currentTrainExamples, SGD_ITERS, ETA)
+		print "leaving out the", (i+1), "the segment of the data, the validation error for the regression is:", boostedtree.evaluatePredictor(logisticPredictor, featurized_examples[startTest:endTest])
 
 #test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
 
