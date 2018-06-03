@@ -48,7 +48,7 @@ def learnRegression(examples, numIters, stepSize):
 
 def trainAndEvaluate():
 
-    # Import the training and data as numpy arrays
+    # Import the training data as a numpy array
     train_array = csvAsArray('train_updated.csv')
 
     # Generate a list of (feature vector, value) tuples for the training data

@@ -61,9 +61,8 @@ def learnBoostedRegression(examples, num_iters, step_size, num_trees):
 
 def trainAndEvaluate():
 
-    # Import the training and test data as numpy arrays
+    # Import the training data as a numpy array
     train_array = csvAsArray('train_updated.csv')
-    test_array  = csvAsArray('test.csv')
 
     # Generate a list of (feature vector, value) tuples for the training data
     feature_names = getCsvHeaders('train_updated.csv')
