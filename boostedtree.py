@@ -19,8 +19,6 @@ from util import dotProduct, increment, featurize, evaluatePredictor, \
 
 # LEARNING FUNCTIONS -----------------------------------------------------------
 
-NUM_TREES = 5
-
 # LOSS GRADIENT: Return the gradient of the training loss with respect to the
 # weight vector for a given example (features, true_value)
 def lossGradient(features, weights, true_value):
