@@ -67,7 +67,7 @@ def featurize(feature_values, feature_names):
 
 # COMPUTATION ------------------------------------------------------------------
 
-def trainAndTest():
+def trainAndEvaluate():
 
     # Import the training and test data as numpy arrays
     train_array = csvAsArray('train_updated.csv')
@@ -97,4 +97,4 @@ def trainAndTest():
     print "Regression MSE:     ", regression_error
     print ""
 
-trainAndTest()
+trainAndEvaluate()

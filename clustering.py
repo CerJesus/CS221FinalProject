@@ -1,4 +1,15 @@
-#This is our logistic regression file
+"""
+Beating the Bubble: Housing Prices in Ames, Iowa
+
+Filename: clustering.py
+Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Python 2.7
+
+DESCRIPTION
+This script defines a naive baseline predictor and evaluates its mean squared
+error.
+"""
+
 import math, random
 from collections import defaultdict
 import numpy

@@ -1,7 +1,7 @@
 """
 Beating the Bubble: Housing Prices in Ames, Iowa
 
-Filename: boosted-regression.py
+Filename: boostedtree.py
 Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
 Python 2.7
 
@@ -31,21 +31,20 @@ def lossGradient(features, weights, true_value):
 
 # BOOSTED REGRESSION: Learn a linear regression model using boosted trees and
 # return the predicted sale price given an input tuple
-def learnBoostedRegression(examples, numIters, stepSize):
-    list_weights = [defaultdict(int) for _ in range(NUM_TREES)]
+def learnBoostedRegression(examples, num_iters, step_size, num_trees):
+    list_weights = [defaultdict(int) for _ in range(num_trees)]
     objectives = [cur[1] for cur in examples]
-    #print len(list_weights), NUM_TREES
 
-    for k in range(NUM_TREES):
+    for k in range(num_trees):
         print ""
-        print "TREE " + str(k + 1) + " OF " + str(NUM_TREES)
+        print "TREE " + str(k + 1) + " OF " + str(num_trees)
         curWeights = defaultdict(int)
-        for i in range(numIters):
+        for i in range(num_iters):
             for ind in range(len(examples)):
                 x = examples[ind][0]
                 gradient = lossGradient(x, curWeights, objectives[ind])
-                increment(curWeights, - stepSize, gradient)
-            print "Training progress: " + str(100.0 * (i + 1) /numIters) + "%"
+                increment(curWeights, - step_size, gradient)
+            print "Training progress: " + str(100.0 * (i + 1) /num_iters) + "%"
     	
         list_weights[k] = curWeights
 
@@ -84,7 +83,7 @@ def featurize(feature_values, feature_names):
 
 # COMPUTATION ------------------------------------------------------------------
 
-def trainAndTest():
+def trainAndEvaluate():
 
     # Import the training and test data as numpy arrays
     train_array = csvAsArray('train_updated.csv')
@@ -103,7 +102,7 @@ def trainAndTest():
     # Train a regression model on the training data and evaluate its mean
     # squared error with the test data
     boostedRegressionPredictor = learnBoostedRegression(train_examples, 10, \
-            0.00000000001)
+            0.00000000001, num_trees=5)
     regression_error = evaluatePredictor(boostedRegressionPredictor, \
             train_examples)
 
@@ -116,4 +115,4 @@ def trainAndTest():
     print "Regression MSE:     " + str(regression_error)
     print ""
 
-trainAndTest()
+trainAndEvaluate()
