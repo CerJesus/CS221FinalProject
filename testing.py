@@ -21,14 +21,14 @@ from copy import copy
 #import kmeans
 
 ## CONSTANTS
-SGD_ITERS = 10
+SGD_ITERS = 50
 ETA = 0.00000000001
 NUM_SPLITS = 10
-NUM_TREES = 2
+NUM_TREES = 5
 
 # R SQUARED: Compute the r-squared value
 def r_squared(examples, predictor):
-	prediction_error = util.evaluatePredictor(predictor, examples)*len(examples)
+	prediction_error = util.evaluatePredictor(predictor, examples)
 
 	outputs = []
 	for i in range(len(examples)):
@@ -71,26 +71,19 @@ def find_feature_values(examples, col_names):
 
 	return r_adj_list
 
-
 ## Processing training data
 file_train = 'train_updated.csv'
 data_train = pd.read_csv(file_train)
-col_names = data_train.columns.tolist()[1:]
+col_names = data_train.columns.tolist()
+col_names = col_names[:len(col_names) - 1]
 
 train_array = data_train.as_matrix(columns=None)
-
-train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
-
-## Processing training data
-file_train = 'train_updated.csv'
-data_train = pd.read_csv(file_train)
-col_names = data_train.columns.tolist()[1:]
-
-train_array = data_train.as_matrix(columns=None)
+print train_array
 
 train_examples = [ ( [train_array[i][j] for j in range(len(train_array[i]) - 1) ], train_array[i][len(train_array[0]) - 1]) for i in range(len(train_array))]
 
 featurized_examples = [ (util.featurize(train_examples[i][0], col_names), train_examples[i][1]) for i in range(len(train_examples))]
+#print featurized_examples
 
 ## evaluate the value of different features
 def orderFeatures():
@@ -136,21 +129,25 @@ def forward_selection():
 		r_sq_list = []
 		count = 1
 		for var_name in col_names_left:
+			examples_list = [(defaultdict(int) , featurized_examples[j][1]) for j in range(p)]
 			for i in range(len(examples_list)):
 				first_entry = examples_list[i][0]
-				if var_name in featurized_examples[i][0]:
-					first_entry[var_name] = featurized_examples[i][0][var_name]
+				for feature_name, value in featurized_examples[i][0].iteritems():
+					if var_name in feature_name:
+						first_entry[var_name] = featurized_examples[i][0][feature_name]
 				examples_list[i] = (first_entry, examples_list[i][1])
 
+			#print examples_list
 			predictor = boostedtree.learnBoostedRegression(examples_list, SGD_ITERS, ETA, NUM_TREES)
 
 			#compute  r^2
 			r_sq = r_squared(examples_list, predictor)
+			print r_sq
 
 			#store it
 			r_sq_list.append(r_sq)
 			
-			print "we have trained ", (count), " out of ", (len(col_names_left) - 1), "variables"
+			print "we have trained ", (count), " out of ", (len(col_names_left)), "variables"
 			count += 1
 
 		# choose the best one and add it to the list
