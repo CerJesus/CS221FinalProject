@@ -8,7 +8,7 @@ import util
 from boostedtree import lossGradient, learnBoostedRegression
 import cPickle as pickle
 
-NUM_B_TREES = 1
+NUM_B_TREES = 5
 
 NUM_CLUSTERS = 5
 
@@ -64,7 +64,7 @@ def kmeans(full_examples, K, maxIters):
 
             loss_list[j] = (full_examples[j][1] - centroid_vals[assign[j]])
             loss += loss_list[j]
-
+        print "LOSS: " + str(loss)
     	if assign == prev_assign:
             print loss
             return centroids, assign, loss, loss_list, centroid_vals
@@ -129,10 +129,10 @@ def trainAndTest():
     # Train a k-means model on the training data and evaluate its mean
     # squared error with the test data
 
-    #(centroids, assign, loss, loss_list, centroid_vals) = kmeans(train_examples, NUM_CLUSTERS, 500)
-    #pickle.dump((centroids, assign, loss, loss_list, centroid_vals), open("centroids.p","wb"))
+    (centroids, assign, loss, loss_list, centroid_vals) = kmeans(train_examples, NUM_CLUSTERS, 500)
+    pickle.dump((centroids, assign, loss, loss_list, centroid_vals), open("centroids.p","wb"))
 
-    (centroids, assign, loss, loss_list, centroid_vals) = pickle.load(open("centroids.p","rb"))
+    #(centroids, assign, loss, loss_list, centroid_vals) = pickle.load(open("centroids.p","rb"))
 
     boostedExamples = [(k_examples[j],loss_list[j]) for j in range(len(k_examples))]
 
@@ -146,7 +146,7 @@ def trainAndTest():
         assignment = 0
     	min_dist = 1,000
     	for i in range(NUM_CLUSTERS):
-    		cur_dist = util.dotProduct(x,x) - 2*util.dotProduct(centroids[i], example) + pre_computed_centroid_dots[i]
+    		cur_dist = util.dotProduct(x,x) - 2*util.dotProduct(centroids[i], x) + pre_computed_centroid_dots[i]
     		if cur_dist < min_dist:
     			assignment = i
     			min_dist = cur_dist
@@ -161,7 +161,7 @@ def trainAndTest():
     # Print the results
     print ""
     print "------------------"
-    print "K-MEANS WITH " + str(15) + " CENTROIDS"
+    print "K-MEANS WITH " + str(NUM_CLUSTERS) + " CENTROIDS"
     print "------------------"
     print "Number of examples: " + str(len(k_examples))
     print "Reconstruction loss: " + str(loss)

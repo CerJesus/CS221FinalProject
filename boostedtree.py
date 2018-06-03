@@ -35,13 +35,13 @@ def learnBoostedRegression(examples, num_iters, step_size, num_trees):
                 gradient = lossGradient(x, curWeights, objectives[ind])
                 increment(curWeights, - step_size, gradient)
             print "Training progress: " + str(100.0 * (i + 1) /num_iters) + "%"
-    	
+
         list_weights[k] = curWeights
 
         for j in range(len(examples)):
             x, y = examples[j]
             objectives[j] = objectives[j] - dotProduct(x, curWeights)
-        	
+
         print "COMPLETE"
 
     def predictor(x):
@@ -82,4 +82,4 @@ def trainAndEvaluate():
     print "Regression MSE:     " + str(regression_error)
     print ""
 
-trainAndEvaluate()
+#trainAndEvaluate()
