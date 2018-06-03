@@ -14,8 +14,8 @@ import math, random
 from collections import defaultdict
 import numpy  as np
 import pandas as pd
-from util import dotProduct, increment, featurize, evaluatePredictor, \
-        csvAsArray, getCsvHeaders
+from util import dotProduct, increment, lossGradient, featurize, \
+        evaluatePredictor, csvAsArray, getCsvHeaders
 
 # LEARNING FUNCTIONS -----------------------------------------------------------
 

@@ -14,18 +14,10 @@ import math, random
 from collections import defaultdict
 import numpy  as np
 import pandas as pd
-from util import dotProduct, increment, featurize, evaluatePredictor, \
-        csvAsArray, getCsvHeaders
+from util import dotProduct, increment, lossGradient, featurize, \
+        evaluatePredictor, csvAsArray, getCsvHeaders
 
 # LEARNING FUNCTIONS -----------------------------------------------------------
-
-# LOSS GRADIENT: Return the gradient of the training loss with respect to the
-# weight vector for a given example (features, true_value)
-def lossGradient(features, weights, true_value):
-    gradient = {}
-    scale = 2 * (dotProduct(features, weights) - true_value)
-    increment(gradient, scale, features)
-    return gradient
 
 # BOOSTED REGRESSION: Learn a linear regression model using boosted trees and
 # return the predicted sale price given an input tuple

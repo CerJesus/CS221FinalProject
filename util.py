@@ -34,6 +34,14 @@ def increment(vec1, scale, vec2):
 
 # MODELING FUNCTIONS -----------------------------------------------------------
 
+# LOSS GRADIENT: Return the gradient of the training loss with respect to the
+# weight vector for a given example (features, true_value)
+def lossGradient(features, weights, true_value):
+    gradient = {}
+    scale = 2 * (dotProduct(features, weights) - true_value)
+    increment(gradient, scale, features)
+    return gradient
+
 # FEATURIZE: Given a feature vector, return an updated feature vector (in the
 # form of a dict). Turns enumerated string features into unique indicator
 # features.
