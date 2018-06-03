@@ -18,13 +18,12 @@ import boostedtree
 import regression
 import kmeans
 
-
 ## CONSTANTS
 SGD_ITERS = 10
 ETA = 0.00000000001
 NUM_SPLITS = 10
 
-
+# R SQUARED: Compute the r-squared value
 def r_squared(examples, predictor, model):
 	prediction_error = model.evaluatePredictor(predictor, examples)*len(examples)
 
@@ -83,7 +82,7 @@ for i in range(NUM_SPLITS):
 	endTest = (i+1)*len(train_examples)/NUM_SPLITS
 	currentTrainExamples = train_examples[0:startTest] + train_examples[endTest:len(train_examples)]
 	logisticPredictor = boostedtree.learnRegression(currentTrainExamples, SGD_ITERS, ETA)
-	print "leaving out the", (i+1), "th segment of the data, the testing error for the regression is:", boostedtree.evaluatePredictor(logisticPredictor, train_examples[startTest:endTest])
+	print "leaving out the", (i+1), "the segment of the data, the validation error for the regression is:", boostedtree.evaluatePredictor(logisticPredictor, train_examples[startTest:endTest])
 
 #test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
 
