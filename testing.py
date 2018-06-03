@@ -15,17 +15,20 @@ from collections import defaultdict
 import numpy
 import pandas as pd
 import boostedtree
-import regression
-import kmeans
+import util
+from copy import copy
+#import regression
+#import kmeans
 
 ## CONSTANTS
 SGD_ITERS = 10
 ETA = 0.00000000001
 NUM_SPLITS = 10
+NUM_TREES = 2
 
 # R SQUARED: Compute the r-squared value
-def r_squared(examples, predictor, model):
-	prediction_error = model.evaluatePredictor(predictor, examples)*len(examples)
+def r_squared(examples, predictor):
+	prediction_error = util.evaluatePredictor(predictor, examples)*len(examples)
 
 	outputs = []
 	for i in range(len(examples)):
@@ -119,6 +122,54 @@ def orderFeatures():
 		print r_adj_list
 
 	print order
+
+def forward_selection():
+	features_order = []
+	best_r_list = []
+	col_names_left = copy(col_names)
+	p = len(featurized_examples[0][0])
+	examples_list = [(defaultdict(int) , featurized_examples[j][1]) for j in range(p)]
+
+
+	for k in range(p):
+		# consider all p - k models that add a predictor to the very last model
+		r_sq_list = []
+		count = 1
+		for var_name in col_names_left:
+			for i in range(len(examples_list)):
+				first_entry = examples_list[i][0]
+				if var_name in featurized_examples[i][0]:
+					first_entry[var_name] = featurized_examples[i][0][var_name]
+				examples_list[i] = (first_entry, examples_list[i][1])
+
+			predictor = boostedtree.learnBoostedRegression(examples_list, SGD_ITERS, ETA, NUM_TREES)
+
+			#compute  r^2
+			r_sq = r_squared(examples_list, predictor)
+
+			#store it
+			r_sq_list.append(r_sq)
+			
+			print "we have trained ", (count), " out of ", (len(col_names_left) - 1), "variables"
+			count += 1
+
+		# choose the best one and add it to the list
+		max_val = -100
+		max_ind = -1
+		for i in range(len(col_names_left)):
+			if r_sq_list[i] > max_val:
+				max_val = r_sq_list[i]
+				max_ind = i
+		features_order.append(col_names_left[max_ind])
+		col_names_left.pop(max_ind)
+		best_r_list.append(max_val)
+
+		print "We have considered ", (k+1), " out of ", (p-1), "variables"
+	#select the best model out of the list of predictors
+	print features_order
+	print best_r_list
+
+forward_selection()
 
 ## split the data, train and evaluation 
 def testTrees():
