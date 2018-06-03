@@ -42,7 +42,7 @@ def learnOracle(examples):
 
 # COMPUTATION ------------------------------------------------------------------
 
-def trainAndTest():
+def trainAndEvaluate():
 
     # Import the training and test data as numpy matrices
     train_array = csvAsArray('train.csv')
@@ -74,4 +74,4 @@ def trainAndTest():
     print "Oracle MSE:            ", oracle_error
     print ""
 
-trainAndTest()
+trainAndEvaluate()

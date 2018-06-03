@@ -14,8 +14,8 @@ import math, random
 from collections import defaultdict
 import numpy  as np
 import pandas as pd
-from util import dotProduct, increment, evaluatePredictor, csvAsArray, \
-        getCsvHeaders
+from util import dotProduct, increment, featurize, evaluatePredictor, \
+        csvAsArray, getCsvHeaders
 
 # LEARNING FUNCTIONS -----------------------------------------------------------
 
@@ -43,27 +43,6 @@ def learnRegression(examples, numIters, stepSize):
         return dotProduct(x, weights)
 
     return predictor
-
-# FEATURIZE: Given a feature vector, return an updated feature vector (in the
-# form of a dict). Turns enumerated string features into unique indicator
-# features.
-def featurize(feature_values, feature_names):
-    features = defaultdict(int)
-    for i in range(len(feature_values)):
-
-        # Case 1: string -> indicator
-        if type(feature_values[i]) == str:
-            features[feature_names[i] + feature_values[i]] = 1
-
-        # Case 2: no value -> NA indicator
-        elif math.isnan(feature_values[i]):
-            features[feature_names[i] + 'NA'] = 1
-
-        # Case 3: already an int -> no change
-        else:
-            features[feature_names[i]] = feature_values[i]
-
-    return features
 
 # COMPUTATION ------------------------------------------------------------------
 

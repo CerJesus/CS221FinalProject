@@ -32,7 +32,28 @@ def increment(vec1, scale, vec2):
         else:
             vec1[key] = scale * vec2[key]
 
-# MODEL TESTING FUNCTIONS ------------------------------------------------------
+# MODELING FUNCTIONS -----------------------------------------------------------
+
+# FEATURIZE: Given a feature vector, return an updated feature vector (in the
+# form of a dict). Turns enumerated string features into unique indicator
+# features.
+def featurize(feature_values, feature_names):
+    features = defaultdict(int)
+    for i in range(len(feature_values)):
+
+        # Case 1: string -> indicator
+        if type(feature_values[i]) == str:
+            features[feature_names[i] + feature_values[i]] = 1
+
+        # Case 2: no value -> NA indicator
+        elif math.isnan(feature_values[i]):
+            features[feature_names[i] + 'NA'] = 1
+
+        # Case 3: already an int -> no change
+        else:
+            features[feature_names[i]] = feature_values[i]
+
+    return features
 
 # PREDICTOR EVALUATION: Compute the mean squared error of a predictor function
 # given a matrix of examples

@@ -6,8 +6,7 @@ Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
 Python 2.7
 
 DESCRIPTION
-This script defines a naive baseline predictor and evaluates its mean squared
-error.
+This script performs k-means clustering on the dataset.
 """
 
 import math, random
@@ -19,35 +18,12 @@ import regression
 import kmeans
 import util
 
-
 ## CONSTANTS
 SGD_ITERS = 10
 ETA = 0.00000000001
 NUM_SPLITS = 10
 NUM_CENTROIDS = 15
 K_ITERS = 500
-
-# FEATURIZE: Given a feature vector, return an updated feature vector (in the
-# form of a dict). Turns enumerated string features into unique indicator
-# features.
-def featurize(feature_values, feature_names):
-    features = defaultdict(int)
-    print ""
-    for i in range(len(feature_values)):
-
-        # Case 1: string -> indicator
-        if type(feature_values[i]) == str:
-            features[feature_names[i] + feature_values[i]] = 1
-
-        # Case 2: no value -> NA indicator
-        elif math.isnan(feature_values[i]):
-            features[feature_names[i] + 'NA'] = 1
-
-        # Case 3: already an int -> no change
-        else:
-            features[feature_names[i]] = feature_values[i]
-
-    return features
 
 # COMPUTATION ------------------------------------------------------------------
 
@@ -65,7 +41,7 @@ def trainAndTest():
     for i in range(len(train_array)):
         feature_count  = range(len(train_array[i]) - 1)
         feature_values = [train_array[i][j] for j in feature_count]
-        feature_vector = featurize(feature_values, feature_names)
+        feature_vector = util.featurize(feature_values, feature_names)
         output         = train_array[i][len(train_array[0]) - 1]
         train_examples.append((feature_vector, output))
         k_examples.append(feature_vector)
