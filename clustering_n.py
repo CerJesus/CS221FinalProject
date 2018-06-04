@@ -129,7 +129,7 @@ def trainAndTest():
         feature_vector = featurize(feature_values, feature_names[1:])
         train_examples.append(feature_vector)
         names.append(train_array[i][1])
-        
+       
 
     # Train a k-means model on the training data and evaluate its mean
     # squared error with the test data

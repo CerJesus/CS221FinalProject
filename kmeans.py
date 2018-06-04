@@ -202,4 +202,4 @@ def trainAndTest():
     # print "Boosted average: " + str(avgError)
     # print ""
 
-trainAndTest()
+#trainAndTest()
