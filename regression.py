@@ -27,6 +27,23 @@ def lossGradient(features, weights, true_value):
     increment(gradient, scale, features)
     return gradient
 
+def lassoLossGradient(features, weights, true_value): #, tuning_parameter):
+
+    # TODO: temp hard-coded parameter
+    tuning_parameter = 5
+
+    # Standard squared loss
+    gradient = {}
+    scale =  2 * (dotProduct(features, weights) - true_value)
+
+    # Lasso term: add gradient of the lasso term to the scaling factor (i.e.
+    # add gradient of |tuning_parameter| * (1-norm of weights)
+    weight_signs = [np.sign(weights[w]) for w in weights]
+    scale += tuning_parameter * sum(weight_signs)
+
+    increment(gradient, scale, features)
+    return gradient
+
 # REGRESSION: Learn a linear regression model and return the predicted sale
 # price given an input tuple
 def learnRegression(examples, numIters, stepSize):
@@ -35,7 +52,7 @@ def learnRegression(examples, numIters, stepSize):
     print ""
     for i in range(numIters):
         for x, y in examples:
-            gradient = lossGradient(x, weights, y)
+            gradient = lassoLossGradient(x, weights, y)
             increment(weights, -stepSize, gradient)
         print "Training progress: " + str(100.0 * (i + 1) / numIters) + "%"
 
