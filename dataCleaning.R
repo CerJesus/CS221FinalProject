@@ -87,9 +87,32 @@ write.csv(zed, "data_house_and_neighborhood.csv")
 # Removing some features
 # ====
 
-data = read.csv("data_house_and_neighborhood.csv")
+data = read.csv("train_updated.csv")
 View(data)
 
-summary = data %>% summarise_all(funs(n_distinct(.)))
 
+data = data %>% 
+  select(-LotShape) %>% 
+  select(-LandContour) %>% 
+  select(-Utilities) %>% 
+  select(-LotConfig) %>% 
+  select(-LandSlope) %>% 
+  select(-RoofStyle) %>%
+  select(-MasVnrType) %>%
+  select(-MasVnrArea) %>%
+  select(-BsmtExposure) %>%
+  select(-Foundation) %>%
+  select(-HeatingQC) %>%
+  select(-CentralAir) %>%
+  select(-FireplaceQu) %>%
+  select(-GarageFinish) %>%
+  select(-PavedDrive) %>%
+  select(-MiscFeature) %>%
+  select(-MiscVal)
+  
+write.csv(data, "train_trimmed.csv")
+
+
+
+summary = data %>% summarise_all(funs(n_distinct(.)))
   

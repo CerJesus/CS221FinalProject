@@ -15,6 +15,7 @@ from collections import defaultdict
 import numpy  as np
 import pandas as pd
 import cPickle as pickle
+import regression
 from util import dotProduct, increment, lossGradient, featurize, \
         evaluatePredictor, csvAsArray, getCsvHeaders
 
@@ -42,7 +43,7 @@ def learnBoostedRegression(examples, num_iters, step_size, num_trees):
             for i in range(num_iters):
                 for ind in range(len(examples)):
                     x = examples[ind][0]
-                    gradient = lossGradient(x, curWeights, objectives[ind])
+                    gradient = regression.lassoLossGradient(x, curWeights, objectives[ind], .5)
                     increment(curWeights, - step_size/(i+1), gradient)
                 if VERBOSE: print "Training progress: " + str(100.0 * (i + 1) /num_iters) + "%"
 
@@ -82,12 +83,16 @@ def trainAndEvaluate():
         output         = train_array[i][len(train_array[0]) - 1]
         train_examples.append((feature_vector, output))
 
+    random.shuffle(train_examples)
+    test = train_examples[:len(train_examples)/10]
+    train_examples = train_examples[len(train_examples)/10:]
+
     # Train a regression model on the training data and evaluate its mean
     # squared error with the test data
-    boostedRegressionPredictor = learnBoostedRegression(train_examples, 10, \
-            0.00000000001, num_trees=5)
+    boostedRegressionPredictor = learnBoostedRegression(train_examples, 500, \
+            0.000000001, num_trees=5)
     regression_error = evaluatePredictor(boostedRegressionPredictor, \
-            train_examples)
+            test)
 
     # Print the results
     print ""
@@ -98,4 +103,4 @@ def trainAndEvaluate():
     print "Regression MSE:     " + str(regression_error)
     print ""
 
-#trainAndEvaluate()
+trainAndEvaluate()
