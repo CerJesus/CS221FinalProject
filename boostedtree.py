@@ -21,11 +21,12 @@ from util import dotProduct, increment, lossGradient, featurize, \
 # LEARNING FUNCTIONS -----------------------------------------------------------
 
 VERBOSE = True
-SAVE = True
+SAVE = False
+cross_val_seg = 1
 
 # BOOSTED REGRESSION: Learn a linear regression model using boosted trees and
 # return the predicted sale price given an input tuple
-def learnBoostedRegression(examples, num_iters, step_size, num_trees, cross_val_seg):
+def learnBoostedRegression(examples, num_iters, step_size, num_trees):
     list_weights = []
     objectives = [cur[1] for cur in examples]
 

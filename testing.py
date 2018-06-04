@@ -204,13 +204,12 @@ def forward_selection():
 ## split the data, train and evaluation 
 def testTrees():
 	random.shuffle(featurized_examples)
-	for j in range(NUM_TREES):
-		for i in range(0, NUM_SPLITS, 2):
-			startTest = i*len(featurized_examples)/NUM_SPLITS
-			endTest = (i+1)*len(featurized_examples)/NUM_SPLITS
-			currentTrainExamples = featurized_examples[0:startTest] + featurized_examples[endTest:len(featurized_examples)]
-			logisticPredictor = boostedtree.learnBoostedRegression(currentTrainExamples, SGD_ITERS, ETA, j, i)
-			print "leaving out the", (i+1), "the segment of the data, the validation error for the regression is:", boostedtree.evaluatePredictor(logisticPredictor, featurized_examples[startTest:endTest])
+	for i in range(0, NUM_SPLITS, 2):
+		startTest = i*len(featurized_examples)/NUM_SPLITS
+		endTest = (i+1)*len(featurized_examples)/NUM_SPLITS
+		currentTrainExamples = featurized_examples[0:startTest] + featurized_examples[endTest:len(featurized_examples)]
+		logisticPredictor = boostedtree.learnBoostedRegression(currentTrainExamples, SGD_ITERS, ETA, 5)
+		print "leaving out the", (i+1), "the segment of the data, the validation error for the regression is:", boostedtree.evaluatePredictor(logisticPredictor, featurized_examples[startTest:endTest])
 
 testTrees()
 

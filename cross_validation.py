@@ -60,7 +60,7 @@ def crossValidate(predictor, num_folds):
         print "----------"
         print "REGRESSION"
         print "----------"
-        print "Lambda (lasso): ", tuning_parameter
+        print "Lambda: ", tuning_parameter
         print "Number of examples: ", len(train_examples)
         print "Regression MSE:     ", regression_error
         print ""
