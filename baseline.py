@@ -23,7 +23,7 @@ def learnBaseline(np_array):
     sale_prices = [np_array[i][80] for i in range(len(np_array))]
     np.sort(sale_prices)
     median_sale_price = sale_prices[len(sale_prices) / 2 - 1] / 1000.0
-
+    print median_sale_price
     def baselinePredictor(x):
         return median_sale_price
 

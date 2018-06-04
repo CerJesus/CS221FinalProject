@@ -5,6 +5,7 @@ import collections
 import math
 import sys
 import util
+import numpy as np
 from boostedtree import lossGradient, learnBoostedRegression
 import cPickle as pickle
 
@@ -74,7 +75,7 @@ def kmeans(full_examples, K, maxIters):
             val_means[index] = val_means[index]/cluster_count[index]
 
         centroids = means
-        centroid_vals = val_means
+        centroid_vals = val_means 
 
     	if centroids == prev_centroids:
             print loss
