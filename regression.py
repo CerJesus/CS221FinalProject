@@ -30,7 +30,7 @@ def lossGradient(features, weights, true_value):
 def lassoLossGradient(features, weights, true_value): #, tuning_parameter):
 
     # TODO: temp hard-coded parameter
-    tuning_parameter = 5
+    tuning_parameter = .5
 
     # Standard squared loss
     gradient = {}
@@ -39,7 +39,25 @@ def lassoLossGradient(features, weights, true_value): #, tuning_parameter):
     # Lasso term: add gradient of the lasso term to the scaling factor (i.e.
     # add gradient of |tuning_parameter| * (1-norm of weights)
     weight_signs = [np.sign(weights[w]) for w in weights]
-    scale += tuning_parameter * sum(weight_signs)
+
+    for w in weights:
+        gradient[w] = tuning_parameter * sum(weight_signs)
+
+    increment(gradient, scale, features)
+    return gradient
+
+def regularizationLossGradient(features, weights, true_value): #, tuning_parameter):
+
+    # TODO: temp hard-coded parameter
+    tuning_parameter = .5
+
+    # Standard squared loss
+    gradient = {}
+    scale =  2 * (dotProduct(features, weights) - true_value)
+
+    # Regu;arization term: add gradient of the regularization term to the scaling factor (i.e.
+    # add gradient of |tuning_parameter| * (2-norm of weights)^2 
+    increment(gradient, 1, weights)
 
     increment(gradient, scale, features)
     return gradient
