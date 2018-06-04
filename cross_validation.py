@@ -18,4 +18,5 @@ from util import dotProduct, increment, lossGradient, featurize, \
 
 # CROSS-VALIDATION FUNCTIONS ---------------------------------------------------
 
-
+def crossValidate(predictor, num_folds):
+    
