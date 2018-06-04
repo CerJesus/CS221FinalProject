@@ -27,10 +27,10 @@ def lossGradient(features, weights, true_value):
     increment(gradient, scale, features)
     return gradient
 
-def lassoLossGradient(features, weights, true_value): #, tuning_parameter):
+def lassoLossGradient(features, weights, true_value, tuning_parameter): #, tuning_parameter):
 
     # TODO: temp hard-coded parameter
-    tuning_parameter = .5
+    #tuning_parameter = .5
 
     # Standard squared loss
     gradient = {}
@@ -41,15 +41,15 @@ def lassoLossGradient(features, weights, true_value): #, tuning_parameter):
     weight_signs = [np.sign(weights[w]) for w in weights]
 
     for w in weights:
-        gradient[w] = tuning_parameter * sum(weight_signs)
+        gradient[w] = tuning_parameter * np.sign(weights[w])
 
     increment(gradient, scale, features)
     return gradient
 
-def regularizationLossGradient(features, weights, true_value): #, tuning_parameter):
+def regularizationLossGradient(features, weights, true_value, tuning_parameter): #, tuning_parameter):
 
     # TODO: temp hard-coded parameter
-    tuning_parameter = .5
+    #tuning_parameter = .5
 
     # Standard squared loss
     gradient = {}
@@ -57,20 +57,20 @@ def regularizationLossGradient(features, weights, true_value): #, tuning_paramet
 
     # Regu;arization term: add gradient of the regularization term to the scaling factor (i.e.
     # add gradient of |tuning_parameter| * (2-norm of weights)^2 
-    increment(gradient, 1, weights)
+    increment(gradient, tuning_parameter, weights)
 
     increment(gradient, scale, features)
     return gradient
 
 # REGRESSION: Learn a linear regression model and return the predicted sale
 # price given an input tuple
-def learnRegression(examples, numIters, stepSize):
+def learnRegression(examples, numIters, stepSize, tuning_parameter):
     weights = defaultdict(int)
 
     print ""
     for i in range(numIters):
         for x, y in examples:
-            gradient = lassoLossGradient(x, weights, y)
+            gradient = regularizationLossGradient(x, weights, y, tuning_parameter)
             increment(weights, -stepSize, gradient)
         print "Training progress: " + str(100.0 * (i + 1) / numIters) + "%"
 
@@ -96,18 +96,25 @@ def trainAndEvaluate():
         output         = train_array[i][len(train_array[0]) - 1]
         train_examples.append((feature_vector, output))
 
+    random.shuffle(train_examples)
+    test = train_examples[:len(train_examples)/10]
+    train = train_examples[len(train_examples)/10:]
+
     # Train a regression model on the training data and evaluate its mean
     # squared error with the test data
-    regressionPredictor = learnRegression(train_examples, 500, 0.00000000001)
-    regression_error    = evaluatePredictor(regressionPredictor, train_examples)
+    for tuning_parameter in range(5, 21, 5):
+        tuning_parameter = 1.0 * tuning_parameter/10
+        regressionPredictor = learnRegression(train, 500, 0.00000000001, tuning_parameter)
+        regression_error    = evaluatePredictor(regressionPredictor, test)
 
-    # Print the results
-    print ""
-    print "----------"
-    print "REGRESSION"
-    print "----------"
-    print "Number of examples: ", len(train_examples)
-    print "Regression MSE:     ", regression_error
-    print ""
+        # Print the results
+        print ""
+        print "----------"
+        print "REGRESSION"
+        print "----------"
+        print "Lambda (lasso): ", tuning_parameter
+        print "Number of examples: ", len(train_examples)
+        print "Regression MSE:     ", regression_error
+        print ""
 
 trainAndEvaluate()
