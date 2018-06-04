@@ -75,7 +75,7 @@ def kmeans(full_examples, K, maxIters):
             val_means[index] = val_means[index]/cluster_count[index]
 
         centroids = means
-        centroid_vals = val_means 
+        centroid_vals = val_means
 
     	if centroids == prev_centroids:
             print loss
@@ -156,7 +156,7 @@ def trainAndTest():
     def boostedKPredictor(x):
         return kmeanspredictor(x) #+ boostedRegPredictor(x)
 
-    avgError = util.evaluatePredictor(boostedKPredictor,boostedExamples)
+    avgError = util.evaluatePredictor(boostedKPredictor,train_examples)
 #print centroids, assign, loss
 
     # Print the results
