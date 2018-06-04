@@ -16,13 +16,14 @@ import numpy
 import pandas as pd
 import boostedtree
 import util
-from copy import copy
+from copy import deepcopy
+import cPickle as pickle
 #import regression
 #import kmeans
 
 ## CONSTANTS
 SGD_ITERS = 10
-ETA = 0.00000000001
+ETA = 0.0000001
 NUM_SPLITS = 10
 NUM_TREES = 2
 
@@ -36,11 +37,16 @@ def r_squared(examples, predictor):
 
 	mean = 1.0*sum(outputs)/len(outputs)
 
-	variance = 0
+	def mean_pred(x):
+		return mean
+
+	variance = util.evaluatePredictor(mean_pred, examples)
+
+	'''variance = 0
 	for i in range(len(outputs)):
 		variance += math.pow(outputs[i] - mean, 2)
 
-	variance = 1.0*variance/len(outputs)
+	variance = 1.0*variance/len(outputs)'''
 
 	return 1 - (prediction_error/variance)
 
@@ -48,22 +54,35 @@ def r_squared(examples, predictor):
 def find_feature_values(examples, col_names):
 	
 	r_adj_list = []
+
+	random.shuffle(examples)
+	n = len(examples)
+	print len(examples[0][0])
+
+	test = examples[:n/10]
+	train = examples[n/10:]
+
 	for i in range(len(col_names)):
 		#remove the feature
-		modified_examples = copy(examples)
+		modified_examples = deepcopy(train)
 		for j in range(len(modified_examples)):
 			#modified_examples[j][0].remove(i)
-			cur = modified_examples[j][0]
-			if col_names[i] in cur: cur.pop(col_names[i])
-
+			for feature_name, value in modified_examples[j][0].iteritems():
+				if col_names[i] in feature_name: 
+					del modified_examples[j][0][feature_name]
+					break
+		
+		print len(train[0][0]), len(modified_examples[0][0])
 		#train a model
-		predictor = boostedtree.learnBoostedRegression(modified_examples, SGD_ITERS, ETA, NUM_TREES)
+		predictor = boostedtree.learnBoostedRegression(modified_examples, SGD_ITERS, ETA/(2*len(col_names)), NUM_TREES)\
+
+		print modified_examples[0]
 
 		#compute the adjusted r^2
-		n = len(examples)
 		k = len(modified_examples[i][0])
-		r_sq = r_squared(modified_examples, predictor)
+		r_sq = r_squared(test, predictor)
 		r_sq_adj = 1 - (1 - r_sq)*((n-1)/(n - k - 1))
+		print r_sq_adj
 
 		#store it
 		r_adj_list.append(r_sq_adj)
@@ -88,13 +107,14 @@ featurized_examples = [ (util.featurize(train_examples[i][0], col_names), train_
 ## evaluate the value of different features
 def orderFeatures():
 	n = len(col_names)
-	train_copy = copy(featurized_examples)
+	train_copy = deepcopy(featurized_examples)
 	col_names_cpy = col_names[:]
 	r_sq = []
 	order = []
 
 	for i in range(n):
 		r_adj_list = find_feature_values(train_copy, col_names_cpy)
+		
 		worst = -1
 		min_val = 100
 		for j in range(len(r_adj_list)):
@@ -116,12 +136,13 @@ def orderFeatures():
 
 	print order
 
+orderFeatures()
+
 def forward_selection():
 	features_order = []
 	best_r_list = []
-	col_names_left = copy(col_names)
+	col_names_left = deepcopy(col_names)
 	p = len(featurized_examples[0][0])
-	examples_list = [(defaultdict(int) , featurized_examples[j][1]) for j in range(p)]
 	current_list = [(defaultdict(int) , featurized_examples[j][1]) for j in range(p)]
 
 
@@ -139,7 +160,8 @@ def forward_selection():
 				util.increment(first_entry, 1, current_list[i][0])
 				examples_list[i] = (first_entry, examples_list[i][1])
 
-			#print examples_list
+			print " "
+			print examples_list[0:5]
 			predictor = boostedtree.learnBoostedRegression(examples_list, SGD_ITERS, ETA, NUM_TREES)
 
 			#compute r^2
@@ -173,11 +195,12 @@ def forward_selection():
 
 
 		print "We have considered ", (k+1), " out of ", (p-1), "variables"
+		print current_list[0]
 	#select the best model out of the list of predictors
 	print features_order
 	print best_r_list
-
-forward_selection()
+	pickle.dump((features_order, best_r_list), open("sorted_features.p","wb"))
+	#(features_order, best_r_list) = pickle.load(open("sorted_features.p","rb"))
 
 ## split the data, train and evaluation 
 def testTrees():

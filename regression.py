@@ -63,7 +63,7 @@ def trainAndEvaluate():
 
     # Train a regression model on the training data and evaluate its mean
     # squared error with the test data
-    regressionPredictor = learnRegression(train_examples, 10, 0.00000000001)
+    regressionPredictor = learnRegression(train_examples, 500, 0.00000000001)
     regression_error    = evaluatePredictor(regressionPredictor, train_examples)
 
     # Print the results
