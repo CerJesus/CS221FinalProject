@@ -15,7 +15,7 @@ File: clustering_n.py
 This file runs the k-means algorithm on neighborhoods in order to determine which ones are most similar
 '''
 
-MAX_NUM_CLUSTERS = 10
+MAX_NUM_CLUSTERS = 16
 STEP_SIZE = 2
 
 def kmeans(full_examples, K, maxIters):
