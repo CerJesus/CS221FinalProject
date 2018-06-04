@@ -14,6 +14,7 @@ import math, random
 from collections import defaultdict
 import numpy  as np
 import pandas as pd
+import cPickle as pickle
 from util import dotProduct, increment, lossGradient, featurize, \
         evaluatePredictor, csvAsArray, getCsvHeaders
 
@@ -45,6 +46,8 @@ def learnBoostedRegression(examples, num_iters, step_size, num_trees):
             objectives[j] = objectives[j] - dotProduct(x, curWeights)
 
         if VERBOSE: print "COMPLETE"
+
+    pickle.dump((list_weights, num_trees, num_iters), open("kmeansboosted.p","wb"))
 
     def predictor(x):
         return sum(dotProduct(x, curWeight) for curWeight in list_weights)
