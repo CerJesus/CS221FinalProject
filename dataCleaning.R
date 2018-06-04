@@ -84,5 +84,12 @@ zed = merge(data, neigh_data, by="Neighborhood")
 write.csv(zed, "data_house_and_neighborhood.csv")
 
 # ====
+# Removing some features
+# ====
+
+data = read.csv("data_house_and_neighborhood.csv")
+View(data)
+
+summary = data %>% summarise_all(funs(n_distinct(.)))
 
   

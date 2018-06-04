@@ -19,6 +19,8 @@ from util import dotProduct, increment, lossGradient, featurize, \
 
 # LEARNING FUNCTIONS -----------------------------------------------------------
 
+VERBOSE = False
+
 # BOOSTED REGRESSION: Learn a linear regression model using boosted trees and
 # return the predicted sale price given an input tuple
 def learnBoostedRegression(examples, num_iters, step_size, num_trees):
@@ -33,8 +35,8 @@ def learnBoostedRegression(examples, num_iters, step_size, num_trees):
             for ind in range(len(examples)):
                 x = examples[ind][0]
                 gradient = lossGradient(x, curWeights, objectives[ind])
-                increment(curWeights, - step_size, gradient)
-            print "Training progress: " + str(100.0 * (i + 1) /num_iters) + "%"
+                increment(curWeights, - step_size/(i+1), gradient)
+            if VERBOSE: print "Training progress: " + str(100.0 * (i + 1) /num_iters) + "%"
 
         list_weights[k] = curWeights
 
@@ -42,7 +44,7 @@ def learnBoostedRegression(examples, num_iters, step_size, num_trees):
             x, y = examples[j]
             objectives[j] = objectives[j] - dotProduct(x, curWeights)
 
-        print "COMPLETE"
+        if VERBOSE: print "COMPLETE"
 
     def predictor(x):
         return sum(dotProduct(x, curWeight) for curWeight in list_weights)
