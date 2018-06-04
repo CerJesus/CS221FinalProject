@@ -117,4 +117,4 @@ def trainAndEvaluate():
         print "Regression MSE:     ", regression_error
         print ""
 
-trainAndEvaluate()
+#trainAndEvaluate()

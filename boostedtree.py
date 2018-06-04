@@ -20,34 +20,44 @@ from util import dotProduct, increment, lossGradient, featurize, \
 
 # LEARNING FUNCTIONS -----------------------------------------------------------
 
-VERBOSE = False
+VERBOSE = True
+SAVE = True
 
 # BOOSTED REGRESSION: Learn a linear regression model using boosted trees and
 # return the predicted sale price given an input tuple
-def learnBoostedRegression(examples, num_iters, step_size, num_trees):
-    list_weights = [defaultdict(int) for _ in range(num_trees)]
+def learnBoostedRegression(examples, num_iters, step_size, num_trees, cross_val_seg):
+    list_weights = []
     objectives = [cur[1] for cur in examples]
 
+    filename = "boostedtrees_" + str(num_trees - 1) + "_" + str(cross_val_seg) + ".p"
+    if num_trees > 1 and SAVE:
+        (list_weights, num_trees_prev, num_iters_prev) = pickle.load(open(filename,"rb"))
+
     for k in range(num_trees):
-        print ""
-        print "TREE " + str(k + 1) + " OF " + str(num_trees)
-        curWeights = defaultdict(int)
-        for i in range(num_iters):
-            for ind in range(len(examples)):
-                x = examples[ind][0]
-                gradient = lossGradient(x, curWeights, objectives[ind])
-                increment(curWeights, - step_size/(i+1), gradient)
-            if VERBOSE: print "Training progress: " + str(100.0 * (i + 1) /num_iters) + "%"
+        if k >= len(list_weights):
+            print ""
+            print "TREE " + str(k + 1) + " OF " + str(num_trees)
+            curWeights = defaultdict(int)
+            for i in range(num_iters):
+                for ind in range(len(examples)):
+                    x = examples[ind][0]
+                    gradient = lossGradient(x, curWeights, objectives[ind])
+                    increment(curWeights, - step_size/(i+1), gradient)
+                if VERBOSE: print "Training progress: " + str(100.0 * (i + 1) /num_iters) + "%"
 
-        list_weights[k] = curWeights
-
+            list_weights.append(curWeights)
+        else:
+            curWeights = list_weights[k]
+        
         for j in range(len(examples)):
             x, y = examples[j]
             objectives[j] = objectives[j] - dotProduct(x, curWeights)
 
         if VERBOSE: print "COMPLETE"
 
-    pickle.dump((list_weights, num_trees, num_iters), open("kmeansboosted.p","wb"))
+    if SAVE: 
+        filename = "boostedtrees_" + str(num_trees) + "_" + str(cross_val_seg) + ".p"
+        pickle.dump((list_weights, num_trees, num_iters), open(filename ,"wb"))
 
     def predictor(x):
         return sum(dotProduct(x, curWeight) for curWeight in list_weights)

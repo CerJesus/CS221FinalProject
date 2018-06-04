@@ -49,57 +49,57 @@ def trainAndTest():
 
     random.shuffle(train_examples)
 
-    for i in range(0, NUM_SPLITS, 1):
-        startTest = i*len(featurized_examples)/NUM_SPLITS
-        endTest = (i+1)*len(featurized_examples)/NUM_SPLITS
-        currentTrain = featurized_examples[0:startTest] + featurized_examples[endTest:len(featurized_examples)]
-        currentTest = featurized_examples[startTest:endTest]
+    for i in range(1, NUM_SPLITS, 2):
+        startTest = i*len(train_examples)/NUM_SPLITS
+        endTest = (i+1)*len(train_examples)/NUM_SPLITS
+        currentTrain = train_examples[0:startTest] + train_examples[endTest:len(train_examples)]
+        currentTest = train_examples[startTest:endTest]
 
         # Cluster the data using k-means
-        (centroids, assign, loss) = kmeans.kmeans(currentTrain, NUM_CENTROIDS, K_ITERS)
+        (centroids, assign, loss, loss_list, centroid_vals) = kmeans.kmeans(currentTrain, NUM_CENTROIDS, K_ITERS)
 
         # Make clusters
         cluster_list = [ [] for _ in range(len(centroids))]
 
-        for i in range(len(currentTrain)):
-        	cluster_list[assign[i]].append(currentTrain[i])
+        for j in range(len(currentTrain)):
+        	cluster_list[assign[i]].append(currentTrain[j])
 
         # Train a regression model on the training data (by cluster) 
         # and evaluate its mean squared error with the train data
         regression_error = 0
         predictor_list = []
-        for cluster_points in cluster_list:
-        	boostedRegressionPredictor = boostedtree.learnBoostedRegression(cluster_points, SGD_ITERS, ETA)
-        	predictor_list.append(boostedRegressionPredictor)
-        	#regression_error += boostedtree.evaluatePredictor(boostedRegressionPredictor, cluster_points)*len(cluster_points)
+        pre_computed_centroid_dots = [util.dotProduct(centroids[k], centroids[k]) for k in range(len(centroids))]
 
-        pre_computed_centroid_dots = [util.dotProduct(centroids[i],centroids[i]) for i in range(len(centroids))]
-        def predictor(x):
-            centroid_ind = 0
-            minDist = float('inf')
-            for i in range(len(centroids)):
-                cur_dist = util.dotProduct(x,x) - 2*util.dotProduct(centroids[i], x) + pre_computed_centroid_dots[i]
-                if cur_dist < min_dist:
-                    assignment = i
-                    min_dist = cur_dist
-            
-            return predictor_list[i](x)
+        for cluster_points in cluster_list:
+        	boostedRegressionPredictor = boostedtree.learnBoostedRegression(cluster_points, SGD_ITERS, ETA, 5, 0)
+        	predictor_list.append(boostedRegressionPredictor)
+        	
+    	def predictor(x):
+    		centroid_ind = 0
+    		minDist = float('inf')
+    		for k in range(len(centroids)):
+    			cur_dist = util.dotProduct(x,x) - 2*util.dotProduct(centroids[k], x) + pre_computed_centroid_dots[k]
+    			min_dist = float('inf')
+    			if cur_dist < min_dist:
+    				assignment = k
+    				min_dist = cur_dist
+    		return predictor_list[i](x)
         
 
-        regression_error = boostedtree.evaluatePredictor(predictor, currentTest)
+    	regression_error = boostedtree.evaluatePredictor(predictor, currentTest)
         #regression_error /= len(train_examples)
 
         # Print the results
-        print ""
-        print "------------------"
-        print "CLUSTERED REGRESSION WITH BOOSTING"
-        print "------------------"
-        print "Leaving out segment: " + str(i)
-        print "Number of centroids: " + str(10)
-        print "Number of examples: " + str(len(train_examples))
-        print "Regression MSE:     " + str(regression_error)
-        print ""
+    	print ""
+    	print "------------------"
+    	print "CLUSTERED REGRESSION WITH BOOSTING"
+    	print "------------------"
+    	print "Leaving out segment: " + str(i)
+    	print "Number of centroids: " + str(10)
+    	print "Number of examples: " + str(len(train_examples))
+    	print "Regression MSE:     " + str(regression_error)
+    	print ""
 
-        return predictor_list, centroids, regression_error
+    return predictor_list, centroids, regression_error
 
 trainAndTest()
