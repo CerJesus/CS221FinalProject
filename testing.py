@@ -22,10 +22,10 @@ import cPickle as pickle
 #import kmeans
 
 ## CONSTANTS
-SGD_ITERS = 10
+SGD_ITERS = 500
 ETA = 0.0000001
 NUM_SPLITS = 10
-NUM_TREES = 2
+NUM_TREES = 5
 
 # R SQUARED: Compute the r-squared value
 def r_squared(examples, predictor):
@@ -136,7 +136,6 @@ def orderFeatures():
 
 	print order
 
-orderFeatures()
 
 def forward_selection():
 	features_order = []
@@ -205,12 +204,15 @@ def forward_selection():
 ## split the data, train and evaluation 
 def testTrees():
 	random.shuffle(featurized_examples)
-	for i in range(NUM_SPLITS):
-		startTest = i*len(featurized_examples)/NUM_SPLITS
-		endTest = (i+1)*len(featurized_examples)/NUM_SPLITS
-		currentTrainExamples = featurized_examples[0:startTest] + featurized_examples[endTest:len(featurized_examples)]
-		logisticPredictor = boostedtree.learnRegression(currentTrainExamples, SGD_ITERS, ETA)
-		print "leaving out the", (i+1), "the segment of the data, the validation error for the regression is:", boostedtree.evaluatePredictor(logisticPredictor, featurized_examples[startTest:endTest])
+	for j in range(NUM_TREES):
+		for i in range(0, NUM_SPLITS, 2):
+			startTest = i*len(featurized_examples)/NUM_SPLITS
+			endTest = (i+1)*len(featurized_examples)/NUM_SPLITS
+			currentTrainExamples = featurized_examples[0:startTest] + featurized_examples[endTest:len(featurized_examples)]
+			logisticPredictor = boostedtree.learnBoostedRegression(currentTrainExamples, SGD_ITERS, ETA, numTrees=5)
+			print "leaving out the", (i+1), "the segment of the data, the validation error for the regression is:", boostedtree.evaluatePredictor(logisticPredictor, featurized_examples[startTest:endTest])
+
+testTrees()
 
 #test_examples = ( ( (test_array[i][j] for j in range(len(test_array[i]) - 1) ), test_array[i][79]) for i in range(len(test_array)))
 
