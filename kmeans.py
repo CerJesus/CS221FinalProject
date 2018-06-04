@@ -13,6 +13,8 @@ NUM_B_TREES = 5
 
 NUM_CLUSTERS = 15
 
+NUM_SPLITS = 10
+
 def kmeans(full_examples, K, maxIters):
     '''
     examples: list of examples, each example is a string-to-double dict representing a sparse vector.
@@ -114,7 +116,6 @@ def trainAndTest():
     # Import the training and test data as numpy arrays
     train_array = util.csvAsArray('train_updated.csv')
     test_array  = util.csvAsArray('test.csv')
-
     # Generate a list of (feature vector, value) tuples for the training data
     feature_names = util.getCsvHeaders('train_updated.csv')
     train_examples = []
@@ -126,16 +127,43 @@ def trainAndTest():
         output         = train_array[i][len(train_array[0]) - 1]
         train_examples.append((feature_vector, output))
         k_examples.append(feature_vector)
-
     # Train a k-means model on the training data and evaluate its mean
     # squared error with the test data
 
-    #(centroids, assign, loss, loss_list, centroid_vals) = kmeans(train_examples, NUM_CLUSTERS, 500)
-    #pickle.dump((centroids, assign, loss, loss_list, centroid_vals), open("centroids.p","wb"))
-    #print centroid_vals
-    (centroids, assign, loss, loss_list, centroid_vals) = pickle.load(open("centroids.p","rb"))
+    random.shuffle(train_examples)
+    for i in range(0, NUM_SPLITS, 2):
+    	startTest = i*len(train_examples)/NUM_SPLITS
+    	endTest = (i+1)*len(train_examples)/NUM_SPLITS
+    	currentTrainExamples = train_examples[0:startTest] + train_examples[endTest:len(train_examples)]
+        (centroids, assign, loss, loss_list, centroid_vals) = kmeans(currentTrainExamples, NUM_CLUSTERS, 500)
 
-    boostedExamples = [(k_examples[j],loss_list[j]) for j in range(len(k_examples))]
+        currentBoostedExamples = [(currentTrainExamples[ind][0],loss_list[ind]) for ind in range(len(currentTrainExamples))]
+
+        boostedRegPredictor = learnBoostedRegression(currentBoostedExamples, 500, \
+                0.00000000001, num_trees=NUM_B_TREES)
+
+        pre_computed_centroid_dots = [util.dotProduct(centroids[ind],centroids[ind]) for ind in range(NUM_CLUSTERS)]
+        def kmeanspredictor(x):
+            assignment = 0
+            min_dist = 1000000
+            for j in range(NUM_CLUSTERS):
+            	cur_dist = util.dotProduct(x,x) - 2*util.dotProduct(centroids[j], x) + pre_computed_centroid_dots[j]
+            	if cur_dist < min_dist:
+            		assignment = j
+            		min_dist = cur_dist
+            return centroid_vals[assignment]
+
+        def boostedKPredictor(x):
+            return kmeanspredictor(x) + boostedRegPredictor(x)
+
+        print "leaving out the", (i+1), "th segment of the data, the validation error for the regression is:", util.evaluatePredictor(boostedKPredictor, train_examples[startTest:endTest])
+
+    # (centroids, assign, loss, loss_list, centroid_vals) = kmeans(train_examples, NUM_CLUSTERS, 500)
+    # pickle.dump((centroids, assign, loss, loss_list, centroid_vals), open("centroids.p","wb"))
+    # print centroid_vals
+    #(centroids, assign, loss, loss_list, centroid_vals) = pickle.load(open("centroids.p","rb"))
+
+    #boostedExamples = [(train_examples[j][0],loss_list[j]) for j in range(len(k_examples))]
 
     # list_weights, num_trees, num_iters = pickle.load(open("kmeansboosted.p","rb"))
     # print num_trees
@@ -143,35 +171,35 @@ def trainAndTest():
     # def boostedRegPredictor(x):
     #     return sum(util.dotProduct(x, curWeight) for curWeight in list_weights)
 
-    boostedRegPredictor = learnBoostedRegression(boostedExamples, 500, \
-            0.00000000001, num_trees=NUM_B_TREES)
+    # boostedRegPredictor = learnBoostedRegression(boostedExamples, 500, \
+    #         0.00000000001, num_trees=NUM_B_TREES)
 
-    pre_computed_centroid_dots = [util.dotProduct(centroids[i],centroids[i]) for i in range(NUM_CLUSTERS)]
-    def kmeanspredictor(x):
-        assignment = 0
-    	min_dist = 1,000
-    	for i in range(NUM_CLUSTERS):
-    		cur_dist = util.dotProduct(x,x) - 2*util.dotProduct(centroids[i], x) + pre_computed_centroid_dots[i]
-    		if cur_dist < min_dist:
-    			assignment = i
-    			min_dist = cur_dist
-        return centroid_vals[assignment]
-
-    def boostedKPredictor(x):
-        return kmeanspredictor(x) + boostedRegPredictor(x)
-
-    avgError = util.evaluatePredictor(boostedKPredictor,train_examples)
-#print centroids, assign, loss
+    # pre_computed_centroid_dots = [util.dotProduct(centroids[i],centroids[i]) for i in range(NUM_CLUSTERS)]
+    # def kmeanspredictor(x):
+    #     assignment = 0
+    # 	min_dist = 1,000
+    # 	for i in range(NUM_CLUSTERS):
+    # 		cur_dist = util.dotProduct(x,x) - 2*util.dotProduct(centroids[i], x) + pre_computed_centroid_dots[i]
+    # 		if cur_dist < min_dist:
+    # 			assignment = i
+    # 			min_dist = cur_dist
+    #     return centroid_vals[assignment]
+    #
+    # def boostedKPredictor(x):
+    #     return kmeanspredictor(x) + boostedRegPredictor(x)
+    #
+    # avgError = util.evaluatePredictor(boostedKPredictor,train_examples)
+    #print centroids, assign, loss
 
     # Print the results
-    print ""
-    print "------------------"
-    print "K-MEANS WITH " + str(NUM_CLUSTERS) + " CENTROIDS"
-    print "------------------"
-    print "Number of examples: " + str(len(k_examples))
-    print "Reconstruction loss: " + str(loss)
-    print "Average reconstruction loss: " + str(loss/len(k_examples))
-    print "Boosted average: " + str(avgError)
-    print ""
+    # print ""
+    # print "------------------"
+    # print "K-MEANS WITH " + str(NUM_CLUSTERS) + " CENTROIDS"
+    # print "------------------"
+    # print "Number of examples: " + str(len(k_examples))
+    # print "Reconstruction loss: " + str(loss)
+    # print "Average reconstruction loss: " + str(loss/len(k_examples))
+    # print "Boosted average: " + str(avgError)
+    # print ""
 
 trainAndTest()
