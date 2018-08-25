@@ -136,8 +136,8 @@ def trainAndTest():
 
     for i in range(STEP_SIZE, MAX_NUM_CLUSTERS + 1, STEP_SIZE):
         (centroids, assign, loss, loss_list, centroid_vals) = kmeans(full_examples=train_examples, K=i, maxIters=500)
-        filename = "neighborhoods_centroids" + str(i) + ".p"
-        pickle.dump((centroids, assign, loss, loss_list, centroid_vals, names), open(filename,"wb"))
-        print names ,assign
+        filename = "neighborhood_centroids" + str(i) + ".p"
+        pickle.dump((centroids, assign, loss, loss_list, centroid_vals, names), open(os.path.join("neighborhood_centroids", filename), "wb"))
+        print names, assign
 
 trainAndTest()
