@@ -11,6 +11,7 @@ mean squared error.
 """
 
 import math, random
+import os.path
 from collections import defaultdict
 import numpy  as np
 import pandas as pd
@@ -31,9 +32,9 @@ def learnBoostedRegression(examples, num_iters, step_size, num_trees):
     list_weights = []
     objectives = [cur[1] for cur in examples]
 
-    filename = "boostedtrees_" + str(num_trees - 1) + "_" + str(cross_val_seg) + ".p"
+    filename = "boostedtree_" + str(num_trees - 1) + "_" + str(cross_val_seg) + ".p"
     if num_trees > 1 and SAVE:
-        (list_weights, num_trees_prev, num_iters_prev) = pickle.load(open(filename,"rb"))
+        (list_weights, num_trees_prev, num_iters_prev) = pickle.load(open(os.path.join("boostedtree_weights", filename), "rb"))
 
     for k in range(num_trees):
         if k >= len(list_weights):
@@ -58,8 +59,8 @@ def learnBoostedRegression(examples, num_iters, step_size, num_trees):
         if VERBOSE: print "COMPLETE"
 
     if SAVE: 
-        filename = "boostedtrees_" + str(num_trees) + "_" + str(cross_val_seg) + ".p"
-        pickle.dump((list_weights, num_trees, num_iters), open(filename ,"wb"))
+        filename = "boostedtree_" + str(num_trees) + "_" + str(cross_val_seg) + ".p"
+        pickle.dump((list_weights, num_trees, num_iters), open(os.path.join("boostedtree_weights", filename), "wb"))
 
     def predictor(x):
         return sum(dotProduct(x, curWeight) for curWeight in list_weights)
