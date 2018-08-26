@@ -1,13 +1,10 @@
-
 library(dplyr)
-
-setwd("~/Desktop/CS221/CS221FinalProject")
 
 # ====
 # Cleaning the training data
 # ====
 
-data = read.csv("train.csv")
+data = read.csv("data/train.csv")
 View(data)
 
 data = data %>% 
@@ -39,7 +36,7 @@ zed = data %>%
   group_by(Neighborhood) %>% 
   summarise(num = n())
 
-neigh = read.csv("Neighborhood_Data.csv") %>% 
+neigh = read.csv("data/neighborhood_data.csv") %>% 
   filter(X <= 25) %>% 
   select(-X.1)
 
@@ -72,7 +69,7 @@ neigh_data = neigh_data %>%
   select(-Median_House_Price) %>% 
   select(-X)
 View(neigh_data)
-write.csv(neigh_data, "Neighborhood_Data_Final.csv")
+write.csv(neigh_data, "data/neighborhood_data_final.csv")
 
 # ====
 
@@ -81,13 +78,13 @@ write.csv(neigh_data, "Neighborhood_Data_Final.csv")
 # ====
 
 zed = merge(data, neigh_data, by="Neighborhood")
-write.csv(zed, "data_house_and_neighborhood.csv")
+write.csv(zed, "data/data_house_and_neighborhood.csv")
 
 # ====
 # Removing some features
 # ====
 
-data = read.csv("train_updated.csv")
+data = read.csv("data/train_updated.csv")
 View(data)
 
 
@@ -110,7 +107,7 @@ data = data %>%
   select(-MiscFeature) %>%
   select(-MiscVal)
   
-write.csv(data, "train_trimmed.csv")
+write.csv(data, "data/train_trimmed.csv")
 
 
 
