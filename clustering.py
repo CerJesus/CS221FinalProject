@@ -30,11 +30,11 @@ K_ITERS = 500
 def trainAndTest():
 
     # Import the training and test data as numpy arrays
-    train_array = util.csvAsArray('train_updated.csv')
-    test_array  = util.csvAsArray('test.csv')
+    train_array = util.csvAsArray('data/train_updated.csv')
+    test_array  = util.csvAsArray('data/test.csv')
 
     # Generate a list of (feature vector, value) tuples for the training data
-    feature_names = util.getCsvHeaders('train_updated.csv')
+    feature_names = util.getCsvHeaders('data/train_updated.csv')
 
     train_examples = []
     k_examples = []

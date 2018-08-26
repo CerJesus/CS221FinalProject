@@ -64,7 +64,7 @@ def find_feature_values(examples, col_names):
 
 
 ## Processing training data
-file_train = 'train_updated.csv'
+file_train = 'data/train_updated.csv'
 data_train = pd.read_csv(file_train)
 col_names = data_train.columns.tolist()[1:]
 

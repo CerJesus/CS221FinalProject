@@ -22,10 +22,10 @@ import regression.py
 def crossValidate(predictor, num_folds):
 
     # Import the training data as a numpy array
-    train_array = csvAsArray('train_updated.csv')
+    train_array = csvAsArray('data/train_updated.csv')
 
     # Generate a list of (feature vector, value) tuples for the training data
-    feature_names = getCsvHeaders('train_updated.csv')
+    feature_names = getCsvHeaders('data/train_updated.csv')
 
     # Convert the training array into ([features], value) example tuples
     train_examples = []
