@@ -6,4 +6,4 @@ This project aims to predict house prices from the [Ames Housing dataset](https:
 
 ## Key Techniques
 
-Some techniques we used were used were gradient boosting, weight regularization, and k-means clustering. All mechanisms were coded from scratch using numpy and pandas, allowing us to gain a deeper intuition. For more details on our techniques and their results, please view our [final report](reports/final-report.pdf)
+Some techniques we used were used were gradient boosting, weight regularization, and k-means clustering. All mechanisms were coded from scratch using numpy and pandas, allowing us to gain a deeper intuition. For more details on our techniques and their results, please view our [final report](reports/final-report.pdf).
