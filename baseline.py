@@ -45,8 +45,8 @@ def learnOracle(examples):
 def trainAndEvaluate():
 
     # Import the training and test data as numpy matrices
-    train_array = csvAsArray('train.csv')
-    test_array  = csvAsArray('test.csv')
+    train_array = csvAsArray('data/train.csv')
+    test_array  = csvAsArray('data/test.csv')
 
     # Format the training data as a list of (input, output) tuples
     train_examples = []
