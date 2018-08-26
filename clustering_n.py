@@ -116,10 +116,10 @@ def featurize(feature_values, feature_names):
 def trainAndTest():
 
     # Import the training and test data as numpy arrays
-    train_array = util.csvAsArray('Neighborhood_Data_Final_w_Loc.csv')
+    train_array = util.csvAsArray('data/neighborhood_data_final_w_loc.csv')
 
     # Generate a list of (feature vector, value) tuples for the training data
-    feature_names = util.getCsvHeaders('Neighborhood_Data_Final_w_Loc.csv')
+    feature_names = util.getCsvHeaders('data/neighborhood_data_final_w_loc.csv')
 
     train_examples = []
     names = []
