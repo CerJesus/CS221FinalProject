@@ -1,18 +1,16 @@
-"""
-Beating the Bubble: Housing Prices in Ames, Iowa
+"""Beating the Bubble: Boosted Tree Predictor
 
-Filename: boostedtree.py
-Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Alexandre Bucquet, Jesus Cervantes, Alex Kim
 Python 2.7
 
-DESCRIPTION
-This script defines a standard linear regression predictor and evaluates its
+This module defines a standard linear regression predictor and evaluates its
 mean squared error.
 """
-
-import math, random
+import math
 import os.path
+import random
 from collections import defaultdict
+
 import numpy  as np
 import pandas as pd
 import cPickle as pickle
@@ -20,15 +18,25 @@ import regression
 from util import dotProduct, increment, lossGradient, featurize, \
         evaluatePredictor, csvAsArray, getCsvHeaders
 
-# LEARNING FUNCTIONS -----------------------------------------------------------
 
 VERBOSE = True
 SAVE = False
 cross_val_seg = 1
 
-# BOOSTED REGRESSION: Learn a linear regression model using boosted trees and
-# return the predicted sale price given an input tuple
+
 def learnBoostedRegression(examples, num_iters, step_size, num_trees):
+    """Learns a linear regression model using boosted trees.
+
+    Args:
+        examples: An array of training examples.
+        num_iters (int): Number of training iterations.
+        step_size (int): Stochastic gradient descent step size.
+        num_trees (int): Number of gradient boosting trees.
+
+    Returns:
+        A predictor function that outputs a price (int) given a single input
+        tuple.
+    """
     list_weights = []
     objectives = [cur[1] for cur in examples]
 
@@ -62,15 +70,17 @@ def learnBoostedRegression(examples, num_iters, step_size, num_trees):
         filename = "boostedtree_" + str(num_trees) + "_" + str(cross_val_seg) + ".p"
         pickle.dump((list_weights, num_trees, num_iters), open(os.path.join("boostedtree_weights", filename), "wb"))
 
+    # Define the predictor function
     def predictor(x):
         return sum(dotProduct(x, curWeight) for curWeight in list_weights)
 
     return predictor
 
-# COMPUTATION ------------------------------------------------------------------
 
 def trainAndEvaluate():
-
+    """Trains a gradient-boosted linear regression predictor and prints its
+    mean squared error.
+    """
     # Import the training data as a numpy array
     train_array = csvAsArray('data/train_updated.csv')
 
@@ -104,4 +114,5 @@ def trainAndEvaluate():
     print "Regression MSE:     " + str(regression_error)
     print ""
 
-#trainAndEvaluate()
+if __name__ == "__main__":
+    trainAndEvaluate()
