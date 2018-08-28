@@ -1,36 +1,53 @@
-"""
-Beating the Bubble: Housing Prices in Ames, Iowa
+"""Beating the Bubble: Baseline Predictor
 
-Filename: baseline.py
-Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Alexandre Bucquet, Jesus Cervantes, Alex Kim
 Python 2.7
 
-DESCRIPTION
-This script defines a naive baseline predictor and evaluates its mean squared
-error.
+This module defines and trains a naive baseline predictor. It also evaluates the
+predictor's mean squared error after training.
 """
-
-import math, random
+import math
+import random
 from collections import defaultdict
+
 import numpy  as np
 import pandas as pd
 from util import evaluatePredictor, csvAsArray
 
-# LEARNING FUNCTIONS -----------------------------------------------------------
 
-# BASELINE: Return the median sale price given an appropriate input tuple
 def learnBaseline(np_array):
+    """Generates the baseline predictor function.
+
+    Learns the baseline predictor function by finding the median house price in
+    the training data.
+
+    Args:
+        np_array: A numpy array consisting of training examples.
+
+    Returns:
+        A predictor function, which returns the median sale price (int).
+    """
     sale_prices = [np_array[i][80] for i in range(len(np_array))]
     np.sort(sale_prices)
     median_sale_price = sale_prices[len(sale_prices) / 2 - 1] / 1000.0
     print median_sale_price
     def baselinePredictor(x):
         return median_sale_price
-
     return baselinePredictor
 
-# ORACLE: Return the true sale price given an appropriate input tuple
+
 def learnOracle(examples):
+    """Generates the oracle predictor function.
+
+    Creates a predictor function that simply returns the true house price of
+    any given example.
+
+    Args:
+        examples: An array consisting of each training examples
+
+    Returns:
+        A predictor function, which returns the true sale price (int).        
+    """
     examples_map = {}
     for x, y in examples:
         examples_map[x] = y
@@ -40,13 +57,12 @@ def learnOracle(examples):
 
     return oraclePredictor
 
-# COMPUTATION ------------------------------------------------------------------
 
 def trainAndEvaluate():
-
+    """Trains a baseline predictor and prints its mean squared error.
+    """
     # Import the training and test data as numpy matrices
     train_array = csvAsArray('data/train.csv')
-    test_array  = csvAsArray('data/test.csv')
 
     # Format the training data as a list of (input, output) tuples
     train_examples = []
@@ -74,4 +90,6 @@ def trainAndEvaluate():
     print "Oracle MSE:            ", oracle_error
     print ""
 
-trainAndEvaluate()
+
+if __name__ == "__main__":
+    trainAndEvaluate()
