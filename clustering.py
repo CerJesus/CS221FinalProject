@@ -1,34 +1,30 @@
-"""
-Beating the Bubble: Housing Prices in Ames, Iowa
+"""Beating the Bubble: K-Means Clustering
 
-Filename: clustering.py
-Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Alexandre Bucquet, Jesus Cervantes, Alex Kim
 Python 2.7
 
-DESCRIPTION
-This script performs k-means clustering on the dataset.
+This module defines a k-means clustering algorithm and trains it.
 """
-
-import math, random
+import math
+import random
 from collections import defaultdict
-import numpy
-import pandas as pd
+
 import boostedtree
 import regression
 import kmeans
 import util
 
-## CONSTANTS
+# CONSTANTS
 SGD_ITERS = 500
 ETA = 0.00000000001
 NUM_SPLITS = 10
 NUM_CENTROIDS = 10
 K_ITERS = 500
 
-# COMPUTATION ------------------------------------------------------------------
 
 def trainAndTest():
-
+    """Define K-means clustering and perform clustered regression.
+    """
     # Import the training and test data as numpy arrays
     train_array = util.csvAsArray('data/train_updated.csv')
     test_array  = util.csvAsArray('data/test.csv')
@@ -38,7 +34,6 @@ def trainAndTest():
 
     train_examples = []
     k_examples = []
-    
 
     for i in range(len(train_array)):
         feature_count  = range(len(train_array[i]) - 1)
