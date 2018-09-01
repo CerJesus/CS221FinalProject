@@ -12,7 +12,6 @@ import random
 from collections import defaultdict
 
 import numpy  as np
-import pandas as pd
 import cPickle as pickle
 import regression
 from util import dotProduct, increment, lossGradient, featurize, \

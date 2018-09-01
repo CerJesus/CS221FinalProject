@@ -43,7 +43,7 @@ def learnOracle(examples):
     any given example.
 
     Args:
-        examples: An array consisting of each training examples
+        examples (array): An array consisting of each training example
 
     Returns:
         A predictor function, which returns the true sale price (int).        
