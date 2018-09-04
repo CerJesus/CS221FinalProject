@@ -1,5 +1,11 @@
-#!/usr/bin/python
+"""Beating the Bubble: Clustering on Neighborhoods
 
+Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Python 2.7
+
+This module runs the k-means algorithm on neighborhoods in order to determine
+which ones are most similar.
+"""
 import random
 import collections
 import math
@@ -10,24 +16,24 @@ from boostedtree import lossGradient, learnBoostedRegression
 import cPickle as pickle
 
 
-'''
-File: clustering_n.py
-This file runs the k-means algorithm on neighborhoods in order to determine which ones are most similar
-'''
-
 MAX_NUM_CLUSTERS = 16
 STEP_SIZE = 2
 
+
 def kmeans(full_examples, K, maxIters):
-    '''
-    examples: list of examples, each example is a string-to-double dict representing a sparse vector.
-    K: number of desired clusters. Assume that 0 < K <= |examples|.
-    maxIters: maximum number of iterations to run (you should terminate early if the algorithm converges).
-    Return: (length K list of cluster centroids,
-            list of assignments (i.e. if examples[i] belongs to centers[j], then assignments[i] = j)
-            final reconstruction loss)
-    '''
-    # BEGIN_YOUR_CODE (our solution is 32 lines of code, but don't worry if you deviate from this)
+    """Performs k-means clustering on neighborhoods.
+
+    Args:
+        full_examples (list): List of examples, each example is a string-to-
+            double dict representing a sparse vector.
+        K (int): The number of desired clusters. Assume that 0 < K <= |examples|.
+        maxIters (int): The maximum number of iterations to run. 
+
+    Returns:
+        A tuple of the form (length K list of cluster centroids, list of
+        assignments (i.e. if examples[i] belongs to centers[j], then
+        assignments[i] = j), final reconstruction loss)
+    """
     examples = full_examples
     def find_center(ex_index, example, precomputed_x, precomputed_quantities, centroids):
     	assign = 0
@@ -88,8 +94,6 @@ def kmeans(full_examples, K, maxIters):
 
     print "The reconstruction loss is:", loss
     return centroids, assign, loss, loss_list, centroid_vals
-    #raise Exception("Not implemented yet")
-    # END_YOUR_CODE
 
 # FEATURIZE: Given a feature vector, return an updated feature vector (in the
 # form of a dict). Turns enumerated string features into unique indicator
