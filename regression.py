@@ -1,37 +1,35 @@
-"""
-Beating the Bubble: Housing Prices in Ames, Iowa
+"""Beating the Bubble: Standard Regression
 
-Filename: regression.py
-Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Alexandre Bucquet, Jesus Cervantes, Alex Kim
 Python 2.7
 
-DESCRIPTION
-This script defines a standard linear regression predictor and evaluates its
+This module defines a standard linear regression predictor and evaluates its
 mean squared error.
 """
-
-import math, random
+import math
+import random
 from collections import defaultdict
 import numpy  as np
 import pandas as pd
 from util import dotProduct, increment, lossGradient, featurize, \
         evaluatePredictor, csvAsArray, getCsvHeaders
 
-# LEARNING FUNCTIONS -----------------------------------------------------------
 
-# LOSS GRADIENT: Return the gradient of the training loss with respect to the
-# weight vector for a given example (features, true_value)
-def lossGradient(features, weights, true_value):
-    gradient = {}
-    scale = 2 * (dotProduct(features, weights) - true_value)
-    increment(gradient, scale, features)
-    return gradient
+def lassoLossGradient(features, weights, true_value, tuning_parameter):
+    """Computes the value of the training loss gradient (with respect to the
+    weight vector) at a specific example.
 
-def lassoLossGradient(features, weights, true_value, tuning_parameter): #, tuning_parameter):
+    Training loss includes a lasso (L1) regularization term.
 
-    # TODO: temp hard-coded parameter
-    #tuning_parameter = .5
+    Args:
+        features (dict): A sparse vector of feature values.
+        weights (dict): A sparse vector of feature weights.
+        true_value (int): The true value of an example.
+        tuning_parameter (double): Coefficient of the lasso regularization term.
 
+    Returns:
+        A sparse vector (dict) representing the gradient value.
+    """
     # Standard squared loss
     gradient = {}
     scale =  2 * (dotProduct(features, weights) - true_value)
@@ -46,43 +44,62 @@ def lassoLossGradient(features, weights, true_value, tuning_parameter): #, tunin
     increment(gradient, scale, features)
     return gradient
 
-def regularizationLossGradient(features, weights, true_value, tuning_parameter): #, tuning_parameter):
 
-    # TODO: temp hard-coded parameter
-    #tuning_parameter = .5
+def regularizationLossGradient(features, weights, true_value, tuning_parameter):
+    """Computes the value of the training loss gradient (with respect to the
+    weight vector) at a specific example.
 
+    Training loss includes a ridge (L2) regularization term.
+
+    Args:
+        features (dict): A sparse vector of feature values.
+        weights (dict): A sparse vector of feature weights.
+        true_value (int): The true value of an example.
+        tuning_parameter (double): Coefficient of the ridge regularization term.
+
+    Returns:
+        A sparse vector (dict) representing the gradient value.
+    """
     # Standard squared loss
     gradient = {}
     scale =  2 * (dotProduct(features, weights) - true_value)
 
-    # Regu;arization term: add gradient of the regularization term to the scaling factor (i.e.
-    # add gradient of |tuning_parameter| * (2-norm of weights)^2 
+    # Regularization term: add gradient of the regularization term to the
+    # scaling factor (i.e. add gradient of |tuning_parameter| *
+    # (2-norm of weights)^2 
     increment(gradient, tuning_parameter, weights)
-
     increment(gradient, scale, features)
     return gradient
 
-# REGRESSION: Learn a linear regression model and return the predicted sale
-# price given an input tuple
-def learnRegression(examples, numIters, stepSize, tuning_parameter):
-    weights = defaultdict(int)
 
+def learnRegression(examples, numIters, stepSize, tuning_parameter):
+    """Learns linear regression weights and generates a predictor function.
+
+    Args:
+        examples: An array of training examples.
+        numIters (int): Number of training iterations.
+        stepSize(double): Stochastic gradient descent step size.
+        tuning_parameter (double): Tuning parameter for the loss function.
+        
+    Returns:
+        A predictor function that outputs a price (int) given a single input
+        tuple.
+    """
+    weights = defaultdict(int)
     print ""
     for i in range(numIters):
         for x, y in examples:
             gradient = regularizationLossGradient(x, weights, y, tuning_parameter)
             increment(weights, -stepSize, gradient)
         print "Training progress: " + str(100.0 * (i + 1) / numIters) + "%"
-
     def predictor(x):
         return dotProduct(x, weights)
-
     return predictor
 
-# COMPUTATION ------------------------------------------------------------------
 
 def trainAndEvaluate():
-
+    """Trains a linear regression predictor and prints its mean squared error.
+    """
     # Import the training data as a numpy array
     train_array = csvAsArray('data/train_updated.csv')
 
@@ -104,8 +121,9 @@ def trainAndEvaluate():
     # squared error with the test data
     for tuning_parameter in range(5, 21, 5):
         tuning_parameter = 1.0 * tuning_parameter/10
-        regressionPredictor = learnRegression(train, 500, 0.00000000001, tuning_parameter)
-        regression_error    = evaluatePredictor(regressionPredictor, test)
+        regressionPredictor = learnRegression(train, 500, 0.00000000001,
+                tuning_parameter)
+        regression_error = evaluatePredictor(regressionPredictor, test)
 
         # Print the results
         print ""
@@ -117,4 +135,6 @@ def trainAndEvaluate():
         print "Regression MSE:     ", regression_error
         print ""
 
-#trainAndEvaluate()
+
+if __name__ == "__main__":
+        trainAndEvaluate()

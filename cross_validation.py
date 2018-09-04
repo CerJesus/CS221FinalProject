@@ -1,14 +1,10 @@
-"""
-Beating the Bubble: Housing Prices in Ames, Iowa
+"""Beating the Bubble: Cross-Validation
 
-Filename: cross_validation.py
-Authors:  Alexandre Bucquet, Jesus Cervantes, Alex Kim
+Alexandre Bucquet, Jesus Cervantes, Alex Kim
 Python 2.7
 
-DESCRIPTION
-This script performs cross-validation on any given predictor.
+This module performs cross-validation on any given predictor.
 """
-
 import math, random
 from collections import defaultdict
 import numpy  as np
@@ -17,10 +13,15 @@ from util import dotProduct, increment, lossGradient, featurize, \
         evaluatePredictor, csvAsArray, getCsvHeaders
 import regression.py
 
-# CROSS-VALIDATION FUNCTIONS ---------------------------------------------------
 
 def crossValidate(predictor, num_folds):
+    """Performs k-fold cross validation on a specified predictor function and
+    prints the results.
 
+    Args:
+        predictor (func): A predictor function.
+        num_folds (int): Number of data folds for cross-validation.
+    """
     # Import the training data as a numpy array
     train_array = csvAsArray('data/train_updated.csv')
 
@@ -65,6 +66,6 @@ def crossValidate(predictor, num_folds):
         print "Regression MSE:     ", regression_error
         print ""
 
-# COMPUTATION ------------------------------------------------------------------
 
-cross_validate(regression.learnRegression, 3)
+if __name__ == "__main__":
+    cross_validate(regression.learnRegression, 3)

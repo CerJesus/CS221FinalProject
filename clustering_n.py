@@ -1,4 +1,4 @@
-"""Beating the Bubble: Clustering on Neighborhoods
+"""Beating the Bubble: K-Means Clustering on Neighborhoods
 
 Alexandre Bucquet, Jesus Cervantes, Alex Kim
 Python 2.7
@@ -35,11 +35,13 @@ def kmeans(full_examples, K, maxIters):
         assignments[i] = j), final reconstruction loss)
     """
     examples = full_examples
-    def find_center(ex_index, example, precomputed_x, precomputed_quantities, centroids):
+    def find_center(ex_index, example, precomputed_x, precomputed_quantities,
+                centroids):
     	assign = 0
     	min_dist = 1,000
     	for i in range(K):
-    		cur_dist = precomputed_x[ex_index] - 2*util.dotProduct(centroids[i], example) + precomputed_quantities[i]
+            cur_dist = precomputed_x[ex_index] - 2 * util.dotProduct(
+                    centroids[i], example) + precomputed_quantities[i]
     		if cur_dist < min_dist:
     			assign = i
     			min_dist = cur_dist
@@ -54,7 +56,8 @@ def kmeans(full_examples, K, maxIters):
     centroid_vals = [full_examples[i][1] for i in rand_list]
     assign = [0 for _ in range(len(examples))]
     loss_list = [0 for _ in range(len(examples))]
-    precomputed_x = [util.dotProduct(examples[i], examples[i]) for i in range(len(examples))]
+    precomputed_x = [util.dotProduct(examples[i], examples[i]) for i in \
+            range(len(examples))]
 
     for i in range(maxIters):
         print "Progress:", 1.0*i/maxIters * 100, "%"
@@ -65,11 +68,13 @@ def kmeans(full_examples, K, maxIters):
     	prev_centroids = centroids
     	prev_assign = assign[:]
 
-    	precomputed_quantities = [util.dotProduct(centroids[i], centroids[i]) for i in range(K)]
+    	precomputed_quantities = [util.dotProduct(centroids[i], centroids[i]) \
+                for i in range(K)]
 
     	#loop through the examples to assign
     	for j in range(len(examples)):
-            assign[j] , dist = find_center(j, examples[j], precomputed_x, precomputed_quantities, centroids)
+            assign[j] , dist = find_center(j, examples[j], precomputed_x,
+                    precomputed_quantities, centroids)
             util.increment(means[assign[j]], 1, examples[j])
             val_means[assign[j]] += full_examples[j][1]
             cluster_count[assign[j]] += 1
@@ -95,30 +100,10 @@ def kmeans(full_examples, K, maxIters):
     print "The reconstruction loss is:", loss
     return centroids, assign, loss, loss_list, centroid_vals
 
-# FEATURIZE: Given a feature vector, return an updated feature vector (in the
-# form of a dict). Turns enumerated string features into unique indicator
-# features.
-def featurize(feature_values, feature_names):
-    features = collections.defaultdict(int)
-    print ""
-    for i in range(len(feature_values)):
-
-        # Case 1: string -> indicator
-        if type(feature_values[i]) == str:
-            features[feature_names[i] + feature_values[i]] = 1
-
-        # Case 2: no value -> NA indicator
-        elif math.isnan(feature_values[i]):
-            features[feature_names[i] + 'NA'] = 1
-
-        # Case 3: already an int -> no change
-        else:
-            features[feature_names[i]] = feature_values[i]
-
-    return features
 
 def trainAndTest():
-
+    """Trains neighborhood clustering and prints its results.
+    """
     # Import the training and test data as numpy arrays
     train_array = util.csvAsArray('data/neighborhood_data_final_w_loc.csv')
 
@@ -130,18 +115,21 @@ def trainAndTest():
     for i in range(len(train_array)):
         feature_count  = range(2, len(train_array[i]))
         feature_values = [train_array[i][j] for j in feature_count]
-        feature_vector = featurize(feature_values, feature_names[1:])
+        feature_vector = util.featurize(feature_values, feature_names[1:])
         train_examples.append(feature_vector)
         names.append(train_array[i][1])
        
 
     # Train a k-means model on the training data and evaluate its mean
     # squared error with the test data
-
     for i in range(STEP_SIZE, MAX_NUM_CLUSTERS + 1, STEP_SIZE):
-        (centroids, assign, loss, loss_list, centroid_vals) = kmeans(full_examples=train_examples, K=i, maxIters=500)
+        (centroids, assign, loss, loss_list, centroid_vals) \
+                = kmeans(full_examples=train_examples, K=i, maxIters=500)
         filename = "neighborhood_centroids" + str(i) + ".p"
-        pickle.dump((centroids, assign, loss, loss_list, centroid_vals, names), open(os.path.join("neighborhood_centroids", filename), "wb"))
+        pickle.dump((centroids, assign, loss, loss_list, centroid_vals, names),
+                open(os.path.join("neighborhood_centroids", filename), "wb"))
         print names, assign
 
-trainAndTest()
+
+if __name__ == "__main__":
+    trainAndTest()

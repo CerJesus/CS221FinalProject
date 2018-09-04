@@ -14,6 +14,7 @@ import regression
 import kmeans
 import util
 
+
 # CONSTANTS
 SGD_ITERS = 500
 ETA = 0.00000000001
@@ -23,7 +24,7 @@ K_ITERS = 500
 
 
 def trainAndTest():
-    """Define K-means clustering and perform clustered regression.
+    """Defines K-means clustering and perform clustered regression.
     """
     # Import the training and test data as numpy arrays
     train_array = util.csvAsArray('data/train_updated.csv')
@@ -97,4 +98,6 @@ def trainAndTest():
 
     return predictor_list, centroids, regression_error
 
-trainAndTest()
+
+if __name__ == "__main__":
+    trainAndTest()
